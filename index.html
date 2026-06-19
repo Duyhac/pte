@@ -3,1795 +3,726 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PTE 55 Tracker MVP</title>
-
+<title>PTE 55 Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --text:#f8fafc;
-  --muted:#94a3b8;
-  --accent:#38bdf8;
+  --bg:#0f172a; --card:#1e293b; --text:#f8fafc;
+  --muted:#94a3b8; --accent:#38bdf8;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --purple:#a78bfa;
 }
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+body{ background:var(--bg); color:var(--text); padding:20px; }
+.container{ max-width:1400px; margin:auto; }
+h1{ margin-bottom:4px; font-size:22px; }
+.subtitle{ color:var(--muted); margin-bottom:18px; font-size:13px; }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
+.dashboard{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:18px; }
+.card{ background:var(--card); border-radius:12px; padding:16px; }
+.label{ color:var(--muted); font-size:11px; margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+.value{ font-size:28px; font-weight:bold; }
+.value.good{ color:var(--green); }
+.value.warn{ color:var(--yellow); }
+.value.bad{ color:var(--red); }
+
+.btn-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+button{ background:var(--accent); color:#0f172a; border:none; border-radius:8px; padding:8px 14px; font-weight:bold; cursor:pointer; font-size:13px; }
+button:hover{ opacity:.85; }
+button.danger{ background:var(--red); color:white; }
+
+.section{ background:var(--card); border-radius:12px; padding:18px; margin-bottom:18px; }
+.section h2{ margin-bottom:12px; font-size:15px; }
+
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; }
+.kpi-card{ background:#111827; border-radius:10px; padding:12px; }
+.kpi-title{ color:var(--muted); font-size:11px; margin-bottom:4px; }
+.kpi-score{ font-size:20px; font-weight:bold; color:var(--accent); margin-bottom:2px; }
+.kpi-score.good{ color:var(--green); }
+.kpi-score.warn{ color:var(--yellow); }
+.kpi-score.bad{ color:var(--red); }
+.kpi-sub{ font-size:11px; color:var(--muted); }
+
+.plan-badge{ display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:bold; margin-bottom:8px; }
+.plan-badge.FULL{ background:#22c55e22; color:var(--green); }
+.plan-badge.LIGHT{ background:#f59e0b22; color:var(--yellow); }
+.plan-list{ padding-left:18px; line-height:2; font-size:13px; }
+
+/* TASK GRID */
+.task-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
+.task-card{ background:#111827; border-radius:10px; padding:13px; }
+.task-name{ font-weight:bold; font-size:13px; margin-bottom:2px; }
+.task-vi{ color:var(--muted); font-size:11px; margin-bottom:10px; }
+
+/* DAY BLOCK */
+.day-block{ margin-bottom:8px; background:#0f172a; border-radius:8px; padding:8px 10px; }
+.day-block.today{ border:1px solid var(--accent); }
+.day-block.past{ opacity:.75; }
+
+.day-block-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.day-block-label{ font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px; }
+.today-badge{ background:var(--accent); color:#0f172a; border-radius:3px; padding:0 5px; font-size:9px; font-weight:bold; }
+.day-block-summary{ font-size:11px; font-weight:bold; }
+.day-block-summary.good{ color:var(--green); }
+.day-block-summary.warn{ color:var(--yellow); }
+.day-block-summary.bad{ color:var(--red); }
+.day-block-summary.empty{ color:#334155; }
+
+/* ENTRIES LIST */
+.entries-list{ display:flex; flex-direction:column; gap:4px; margin-bottom:6px; }
+.entry-row{ display:grid; grid-template-columns:1fr 44px 20px; align-items:center; gap:5px; }
+.entry-input{
+  background:transparent; border:none; border-bottom:1px solid #1e293b;
+  color:white; font-size:13px; padding:2px 4px; outline:none; width:100%;
 }
-
-body{
-  background:var(--bg);
-  color:var(--text);
-  padding:20px;
+.entry-input:focus{ border-bottom-color:var(--accent); }
+.entry-pct{ font-size:11px; text-align:right; font-weight:bold; }
+.entry-pct.good{ color:var(--green); }
+.entry-pct.warn{ color:var(--yellow); }
+.entry-pct.bad{ color:var(--red); }
+.entry-pct.empty{ color:#334155; }
+.remove-btn{
+  background:none; color:#475569; border:none; cursor:pointer;
+  font-size:13px; padding:0; line-height:1; font-weight:bold;
 }
+.remove-btn:hover{ color:var(--red); }
 
-.container{
-  max-width:1400px;
-  margin:auto;
+/* ADD BUTTON */
+.add-entry-btn{
+  background:none; border:1px dashed #334155; color:var(--muted);
+  border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer;
+  width:100%; margin-top:2px;
 }
+.add-entry-btn:hover{ border-color:var(--accent); color:var(--accent); }
 
-h1{
-  margin-bottom:10px;
-}
+/* DAY TOTAL */
+.day-total{ margin-top:6px; padding-top:5px; border-top:1px solid #1e293b; display:flex; justify-content:space-between; font-size:11px; }
+.day-total-label{ color:var(--muted); }
 
-.subtitle{
-  color:var(--muted);
-  margin-bottom:20px;
-}
+/* TASK OVERALL TOTAL */
+.task-total{ margin-top:8px; padding-top:7px; border-top:1px solid #1e293b; font-size:12px; display:flex; justify-content:space-between; }
+.tot-label{ color:var(--muted); }
+.tot-val{ font-weight:bold; }
+.tot-val.good{ color:var(--green); }
+.tot-val.warn{ color:var(--yellow); }
+.tot-val.bad{ color:var(--red); }
 
-.dashboard{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:15px;
-  margin-bottom:25px;
-}
+/* TABS */
+.tabs{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+.tab{ padding:5px 14px; border-radius:20px; font-size:12px; cursor:pointer; background:#111827; color:var(--muted); border:1px solid #334155; }
+.tab.active{ background:var(--accent); color:#0f172a; border-color:var(--accent); font-weight:bold; }
 
-.card{
-  background:var(--card);
-  border-radius:12px;
-  padding:16px;
-}
+.history-table{ width:100%; border-collapse:collapse; font-size:12px; }
+.history-table th{ text-align:left; color:var(--muted); padding:6px 10px; border-bottom:1px solid #334155; font-weight:normal; }
+.history-table td{ padding:7px 10px; border-bottom:1px solid #1e293b; }
+.history-table tr:last-child td{ border-bottom:none; }
+.history-table tr.today-row td{ color:var(--accent); font-weight:bold; }
 
-.label{
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:8px;
-}
+.report-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); gap:10px; }
+.report-card{ background:#111827; border-radius:8px; padding:12px; }
+.report-title{ color:var(--muted); font-size:11px; margin-bottom:4px; }
+.report-val{ font-size:18px; font-weight:bold; }
+.report-val.up{ color:var(--green); }
+.report-val.down{ color:var(--red); }
+.report-val.flat{ color:var(--yellow); }
 
-.value{
-  font-size:32px;
-  font-weight:bold;
-}
+.streak-bar{ display:flex; gap:4px; flex-wrap:wrap; margin-top:8px; }
+.streak-dot{ width:14px; height:14px; border-radius:3px; }
+.streak-dot.active{ background:var(--green); }
+.streak-dot.inactive{ background:#1e293b; }
+.streak-dot.today-dot{ border:2px solid var(--accent); }
 
-.section{
-  background:var(--card);
-  border-radius:12px;
-  padding:20px;
-  margin-bottom:20px;
-}
-
-.section h2{
-  margin-bottom:15px;
-}
-
-.task-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-  gap:15px;
-}
-
-.task-card{
-  background:#111827;
-  border-radius:10px;
-  padding:15px;
-}
-
-.task-name{
-  font-weight:bold;
-  margin-bottom:4px;
-}
-
-.task-vi{
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:10px;
-}
-
-textarea{
-  width:100%;
-  min-height:90px;
-  background:#020617;
-  color:white;
-  border:1px solid #334155;
-  border-radius:8px;
-  padding:10px;
-}
-
-.stats{
-  margin-top:10px;
-  font-size:14px;
-}
-
+canvas{ max-height:180px; }
 @media(max-width:700px){
-  .dashboard{
-    grid-template-columns:1fr;
-  }
+  .dashboard{ grid-template-columns:repeat(2,1fr); }
 }
 </style>
 </head>
-
 <body>
-
 <div class="container">
 
-<h1>PTE 55 MASTER TRACKER</h1>
+  <h1>🎯 PTE 55 MASTER TRACKER</h1>
+  <div class="subtitle">PTE Academic • Mục tiêu 55+ • Thi <strong>20/07/2026</strong> • Hôm nay: <span id="todayLabel">—</span></div>
 
-<div class="subtitle">
-PTE Academic Platform • Mục tiêu 55+
+  <div class="dashboard">
+    <div class="card"><div class="label">Ngày còn lại</div><div class="value" id="daysLeft">—</div></div>
+    <div class="card"><div class="label">Overall Prediction</div><div class="value" id="overallPrediction">30</div></div>
+    <div class="card"><div class="label">Accuracy hôm nay</div><div class="value" id="todayAccuracy">—</div></div>
+    <div class="card"><div class="label">Accuracy tổng</div><div class="value" id="overallAccuracy">—</div></div>
+    <div class="card"><div class="label">Streak</div><div class="value" id="streakCount">0 🔥</div></div>
+  </div>
+
+  <div class="btn-row">
+    <button id="exportJSON">⬇ Export JSON</button>
+    <button id="importJSON">⬆ Import JSON</button>
+    <button id="exportCSV">📊 Export CSV</button>
+    <button id="resetAll" class="danger">🗑 Reset All</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+  </div>
+
+  <div class="section">
+    <h2>🎯 Goal Tracker</h2>
+    <div id="todayKPI" class="kpi-grid"></div>
+  </div>
+
+  <div class="section">
+    <h2>📋 Kế hoạch hôm nay</h2>
+    <div id="studyPlan"></div>
+  </div>
+
+  <div class="section">
+    <h2>📝 22 Tasks — Nhập từng bài theo ngày</h2>
+    <div id="taskContainer" class="task-grid"></div>
+  </div>
+
+  <div class="section">
+    <h2>📊 Lịch sử & Phân tích</h2>
+    <div class="tabs">
+      <div class="tab active" data-tab="chart">📈 Biểu đồ</div>
+      <div class="tab" data-tab="table">📋 Bảng ngày</div>
+      <div class="tab" data-tab="weekly">📅 Báo cáo tuần</div>
+      <div class="tab" data-tab="streak">🔥 Streak</div>
+    </div>
+    <div id="tab-chart">
+      <canvas id="accuracyChart" height="70"></canvas><br>
+      <canvas id="predictionChart" height="70"></canvas>
+    </div>
+    <div id="tab-table" style="display:none">
+      <table class="history-table">
+        <thead><tr><th>Ngày</th><th>Acc hôm đó</th><th>Acc tích lũy</th><th>Prediction</th><th>Bài đã nhập</th></tr></thead>
+        <tbody id="historyTableBody"></tbody>
+      </table>
+    </div>
+    <div id="tab-weekly" style="display:none"><div id="weeklyReport"></div></div>
+    <div id="tab-streak" style="display:none"><div id="streakPanel"></div></div>
+  </div>
+
 </div>
-
-<div class="dashboard">
-
-<div class="card">
-<div class="label">Ngày còn lại</div>
-<div class="value" id="daysLeft">0</div>
-</div>
-
-<div class="card">
-<div class="label">Overall Prediction</div>
-<div class="value" id="overallPrediction">30</div>
-</div>
-
-<div class="card">
-<div class="label">Tổng Accuracy</div>
-<div class="value" id="overallAccuracy">0%</div>
-</div>
-
-</div>
-
-<div class="section">
-
-<h2>22 Tasks</h2>
-
-<div
-id="taskContainer"
-class="task-grid">
-</div>
-
-</div>
-
 <script>
-
+// ─── CONFIG ───────────────────────────────────────────────
 const TASKS = [
-
-["Read Aloud","Đọc thành tiếng"],
-["Repeat Sentence","Nhắc lại câu"],
-["Describe Image","Mô tả hình ảnh"],
-["Retell Lecture","Kể lại bài giảng"],
-["Answer Short Question","Trả lời câu hỏi ngắn"],
-
-["Summarize Group Discussion","Tóm tắt thảo luận nhóm"],
-["Respond To Situation","Phản hồi tình huống"],
-
-["Summarize Written Text","Tóm tắt văn bản"],
-["Write Essay","Viết luận"],
-
-["Reading MCQ Multiple","Đọc MCQ nhiều đáp án"],
-["Reading MCQ Single","Đọc MCQ một đáp án"],
-
-["Re-order Paragraphs","Sắp xếp đoạn văn"],
-
-["Reading & Writing FIB","Điền từ đọc + viết"],
-
-["Summarize Spoken Text","Tóm tắt bài nghe"],
-
-["Listening MCQ Multiple","Nghe MCQ nhiều đáp án"],
-["Listening MCQ Single","Nghe MCQ một đáp án"],
-
-["Fill In The Blanks","Điền từ bài nghe"],
-
-["Highlight Correct Summary","Chọn tóm tắt đúng"],
-
-["Select Missing Word","Chọn từ bị thiếu"],
-
-["Highlight Incorrect Words","Tô từ sai"],
-
-["Write From Dictation","Nghe và viết lại"],
-
-["Integrated Practice","Luyện tích hợp"]
-
+  ["Read Aloud","Đọc thành tiếng"],
+  ["Repeat Sentence","Nhắc lại câu"],
+  ["Describe Image","Mô tả hình ảnh"],
+  ["Retell Lecture","Kể lại bài giảng"],
+  ["Answer Short Question","Trả lời câu hỏi ngắn"],
+  ["Summarize Group Discussion","Tóm tắt thảo luận nhóm"],
+  ["Respond To Situation","Phản hồi tình huống"],
+  ["Summarize Written Text","Tóm tắt văn bản"],
+  ["Write Essay","Viết luận"],
+  ["Reading MCQ Multiple","Đọc MCQ nhiều đáp án"],
+  ["Reading MCQ Single","Đọc MCQ một đáp án"],
+  ["Re-order Paragraphs","Sắp xếp đoạn văn"],
+  ["Reading & Writing FIB","Điền từ đọc + viết"],
+  ["Summarize Spoken Text","Tóm tắt bài nghe"],
+  ["Listening MCQ Multiple","Nghe MCQ nhiều đáp án"],
+  ["Listening MCQ Single","Nghe MCQ một đáp án"],
+  ["Fill In The Blanks","Điền từ bài nghe"],
+  ["Highlight Correct Summary","Chọn tóm tắt đúng"],
+  ["Select Missing Word","Chọn từ bị thiếu"],
+  ["Highlight Incorrect Words","Tô từ sai"],
+  ["Write From Dictation","Nghe và viết lại"],
+  ["Integrated Practice","Luyện tích hợp"]
+];
+const EXAM_DATE = new Date("2026-07-20");
+const ADVANCED_GOALS = [
+  {name:"Repeat Sentence",target:70},
+  {name:"Write From Dictation",target:70},
+  {name:"Read Aloud",target:75},
+  {name:"Reading & Writing FIB",target:70},
+  {name:"Fill In The Blanks",target:70}
 ];
 
-const examDate =
-new Date("2026-07-20");
-
-const diff =
-Math.ceil(
-(examDate - new Date())
-/
-86400000
-);
-
-document.getElementById(
-"daysLeft"
-).innerText = diff;
-// =========================
-// STORAGE
-// =========================
-
-function loadData(){
-
-const raw =
-localStorage.getItem(
-"pte_mvp_data"
-);
-
-if(!raw){
-
-return {};
-
-}
-
-try{
-
-return JSON.parse(raw);
-
-}
-catch{
-
-return {};
-
-}
-
-}
-
-function saveData(data){
-
-localStorage.setItem(
-"pte_mvp_data",
-JSON.stringify(data)
-);
-
-}
-
-const DATA =
-loadData();
-
-// =========================
-// CREATE TASK CARDS
-// =========================
-
-const taskContainer =
-document.getElementById(
-"taskContainer"
-);
-
-TASKS.forEach(task=>{
-
-const en = task[0];
-const vi = task[1];
-
-const savedText =
-DATA[en] || "";
-
-const card =
-document.createElement(
-"div"
-);
-
-card.className =
-"task-card";
-
-card.innerHTML =
-
-`
-<div class="task-name">
-${en}
-</div>
-
-<div class="task-vi">
-${vi}
-</div>
-
-<textarea
-id="input_${en}"
-placeholder="Ví dụ:
-12/24
-15/24
-8/20">${savedText}</textarea>
-
-<div
-class="stats"
-id="stats_${en}">
-0 / 0 (0%)
-</div>
-`;
-
-taskContainer.appendChild(
-card
-);
-
-});
-
-// =========================
-// CALCULATE TASK
-// =========================
-
-function calculateTask(text){
-
-let raw = 0;
-let max = 0;
-
-const lines =
-text
-.split("\n")
-.map(x=>x.trim())
-.filter(Boolean);
-
-lines.forEach(line=>{
-
-const match =
-line.match(
-/(\d+)\s*\/\s*(\d+)/
-);
-
-if(!match){
-
-return;
-
-}
-
-raw +=
-Number(match[1]);
-
-max +=
-Number(match[2]);
-
-});
-
-const accuracy =
-
-max > 0
-
-?
-
-(raw/max)*100
-
-:
-
-0;
-
-return {
-
-raw,
-max,
-accuracy
-
-};
-
-}
-
-// =========================
-// UPDATE ALL
-// =========================
-
-function updateAll(){
-
-let totalRaw = 0;
-let totalMax = 0;
-
-TASKS.forEach(task=>{
-
-const en = task[0];
-
-const textarea =
-document.getElementById(
-`input_${en}`
-);
-
-const text =
-textarea.value;
-
-DATA[en] = text;
-
-const result =
-calculateTask(
-text
-);
-
-totalRaw +=
-result.raw;
-
-totalMax +=
-result.max;
-
-document
-.getElementById(
-`stats_${en}`
-)
-.innerHTML =
-
-`
-<b>
-${result.raw}
-/
-${result.max}
-</b>
-
-&nbsp;
-
-(${result.accuracy.toFixed(1)}%)
-`;
-
-});
-
-saveData(DATA);
-
-// =========================
-// OVERALL
-// =========================
-
-const overallAccuracy =
-
-totalMax > 0
-
-?
-
-(totalRaw/totalMax)*100
-
-:
-
-0;
-
-document
-.getElementById(
-"overallAccuracy"
-)
-.innerText =
-
-overallAccuracy
-.toFixed(1)
-
-+
-
-"%";
-
-// =========================
-// SIMPLE PREDICTION
-// =========================
-
-// baseline 30
-
-let prediction =
-
-30 +
-
-(
-overallAccuracy
-*
-0.35
-);
-
-prediction =
-Math.min(
-90,
-prediction
-);
-
-document
-.getElementById(
-"overallPrediction"
-)
-.innerText =
-
-prediction
-.toFixed(0);
-
-}
-
-// =========================
-// EVENTS
-// =========================
-
-TASKS.forEach(task=>{
-
-const en = task[0];
-
-const textarea =
-document.getElementById(
-`input_${en}`
-);
-
-textarea.addEventListener(
-"input",
-updateAll
-);
-
-});
-
-// =========================
-// FIRST LOAD
-// =========================
-
-updateAll();
-// ======================================
-// DAILY HISTORY
-// ======================================
-
+// ─── STORAGE ──────────────────────────────────────────────
+// DATA.__daily[date][taskName] = ["18/24","20/24","15/20", ...]  ← array of score strings
+// DATA.__history = [{date, todayAccuracy, accuracy, prediction}]
+function loadData(){ try{ return JSON.parse(localStorage.getItem("pte_v4")||"{}"); }catch{ return {}; } }
+function saveData(){ localStorage.setItem("pte_v4", JSON.stringify(DATA)); }
+const DATA = loadData();
+if(!DATA.__history) DATA.__history=[];
+if(!DATA.__daily)   DATA.__daily={};
+
+// ─── HELPERS ──────────────────────────────────────────────
 function getToday(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+const TODAY = getToday();
 
-const d = new Date();
+function fmtDate(s){ const[,m,d]=s.split("-"); return `${d}/${m}`; }
 
-const yyyy = d.getFullYear();
-
-const mm =
-String(
-d.getMonth()+1
-).padStart(2,"0");
-
-const dd =
-String(
-d.getDate()
-).padStart(2,"0");
-
-return `${yyyy}-${mm}-${dd}`;
-
+function parseScore(v){
+  const m=(v||"").trim().match(/^(\d+)\s*\/\s*(\d+)$/);
+  return m?{raw:+m[1],max:+m[2]}:null;
 }
 
-if(!DATA.__history){
-
-DATA.__history = [];
-
+// entries: array of strings like ["18/24","20/24"]
+function calcEntries(entries){
+  let raw=0,max=0,cnt=0;
+  (entries||[]).forEach(v=>{ const p=parseScore(v); if(p&&p.max>0){raw+=p.raw;max+=p.max;cnt++;} });
+  return {raw,max,cnt,pct:max>0?(raw/max)*100:0};
 }
 
-function saveDailySnapshot(){
-
-let totalRaw = 0;
-let totalMax = 0;
-
-TASKS.forEach(task=>{
-
-const result =
-calculateTask(
-DATA[task[0]] || ""
-);
-
-totalRaw += result.raw;
-totalMax += result.max;
-
-});
-
-const accuracy =
-
-totalMax > 0
-
-?
-
-(totalRaw/totalMax)*100
-
-:
-
-0;
-
-const today =
-getToday();
-
-const existing =
-DATA.__history.find(
-x=>x.date===today
-);
-
-if(existing){
-
-existing.accuracy =
-accuracy;
-
-existing.prediction =
-calculatePrediction();
-
-}
-else{
-
-DATA.__history.push({
-
-date:today,
-
-accuracy:
-accuracy,
-
-prediction:
-calculatePrediction()
-
-});
-
+// accuracy for a whole day (all tasks)
+function calcDayAccuracy(dayKey){
+  const dd=DATA.__daily[dayKey]||{};
+  let raw=0,max=0;
+  Object.values(dd).forEach(arr=>{ const c=calcEntries(arr); raw+=c.raw; max+=c.max; });
+  return {raw,max,pct:max>0?(raw/max)*100:0};
 }
 
-saveData(DATA);
-
+// accuracy across ALL days
+function calcAllTimeAccuracy(){
+  let raw=0,max=0;
+  Object.keys(DATA.__daily).forEach(d=>{ const a=calcDayAccuracy(d); raw+=a.raw; max+=a.max; });
+  return {raw,max,pct:max>0?(raw/max)*100:0};
 }
 
-// ======================================
-// GOAL TRACKER
-// ======================================
+function calcPrediction(acc){ return Math.min(90,30+acc*0.35); }
 
-function renderGoalTracker(){
+function scoreClass(pct){ return pct<=0?"empty":pct>=70?"good":pct>=50?"warn":"bad"; }
 
-let html =
-
-`
-<div class="kpi-card">
-
-<div class="kpi-title">
-Mục tiêu Overall
-</div>
-
-`;
-
-const overall =
-
-parseFloat(
-document
-.getElementById(
-"overallPrediction"
-)
-.innerText
-);
-
-const remain =
-
-Math.max(
-0,
-55-overall
-);
-
-html +=
-
-`
-<div class="kpi-score">
-${overall}
- / 55
-</div>
-
-<div>
-Còn thiếu:
-${remain.toFixed(1)}
-điểm
-</div>
-
-</div>
-`;
-
-const container =
-document.getElementById(
-"todayKPI"
-);
-
-container.insertAdjacentHTML(
-"beforeend",
-html
-);
-
+function getAllDays(){
+  const keys=Object.keys(DATA.__daily).sort().reverse();
+  if(!keys.includes(TODAY)) keys.unshift(TODAY);
+  return keys;
 }
 
-// ======================================
-// STUDY PLAN
-// ======================================
+function calcStreak(){
+  let streak=0;
+  for(let i=0;i<60;i++){
+    const d=new Date(TODAY); d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    const a=calcDayAccuracy(key);
+    if(a.max>0) streak++;
+    else if(i>0) break;
+  }
+  return streak;
+}
 
+function ensureDay(day,task){
+  if(!DATA.__daily[day]) DATA.__daily[day]={};
+  if(!Array.isArray(DATA.__daily[day][task])) DATA.__daily[day][task]=[];
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+document.getElementById("todayLabel").textContent=fmtDate(TODAY);
+document.getElementById("daysLeft").textContent=Math.ceil((EXAM_DATE-new Date())/86400000);
+ensureDay(TODAY,"_init"); delete DATA.__daily[TODAY]["_init"];
+saveData();
+
+// ─── BUILD TASK CARDS ─────────────────────────────────────
+function buildTaskCards(){
+  const container=document.getElementById("taskContainer");
+  container.innerHTML="";
+  const days=getAllDays();
+
+  TASKS.forEach(([en,vi])=>{
+    const card=document.createElement("div");
+    card.className="task-card";
+    card.innerHTML=`<div class="task-name">${en}</div><div class="task-vi">${vi}</div><div class="day-blocks" id="blocks_${esc(en)}"></div><div class="task-total"><span class="tot-label">Tổng tất cả ngày</span><span class="tot-val empty" id="tot_${esc(en)}">—</span></div>`;
+    container.appendChild(card);
+
+    const blocksEl=document.getElementById(`blocks_${esc(en)}`);
+    days.forEach(day=>{
+      blocksEl.appendChild(buildDayBlock(en,day));
+    });
+
+    updateTaskTotal(en);
+  });
+}
+
+function esc(s){ return s.replace(/[^a-zA-Z0-9]/g,"_"); }
+
+function buildDayBlock(taskName, day){
+  const isToday = day===TODAY;
+  ensureDay(day,taskName);
+  const entries = DATA.__daily[day][taskName] || [];
+
+  const block = document.createElement("div");
+  block.className=`day-block ${isToday?"today":"past"}`;
+  block.id=`block_${esc(taskName)}_${day}`;
+
+  // header
+  const header=document.createElement("div");
+  header.className="day-block-header";
+  header.innerHTML=`
+    <div class="day-block-label">
+      📅 ${fmtDate(day)}
+      ${isToday?'<span class="today-badge">HÔM NAY</span>':""}
+    </div>
+    <div class="day-block-summary empty" id="summary_${esc(taskName)}_${day}">—</div>`;
+  block.appendChild(header);
+
+  // entries list
+  const list=document.createElement("div");
+  list.className="entries-list";
+  list.id=`list_${esc(taskName)}_${day}`;
+  block.appendChild(list);
+
+  // render existing entries
+  (entries.length>0?entries:[""]).forEach((val,idx)=>{
+    list.appendChild(buildEntryRow(taskName,day,idx,val,isToday));
+  });
+
+  // add button (today only)
+  if(isToday){
+    const addBtn=document.createElement("button");
+    addBtn.className="add-entry-btn";
+    addBtn.textContent="+ Thêm bài";
+    addBtn.addEventListener("click",()=>{
+      ensureDay(TODAY,taskName);
+      DATA.__daily[TODAY][taskName].push("");
+      const newIdx=DATA.__daily[TODAY][taskName].length-1;
+      const row=buildEntryRow(taskName,TODAY,newIdx,"",true);
+      list.appendChild(row);
+      row.querySelector(".entry-input").focus();
+      saveData();
+    });
+    block.appendChild(addBtn);
+  }
+
+  // day total line
+  const dayTot=document.createElement("div");
+  dayTot.className="day-total";
+  dayTot.id=`daytot_${esc(taskName)}_${day}`;
+  block.appendChild(dayTot);
+
+  updateDayBlock(taskName,day);
+  return block;
+}
+
+function buildEntryRow(taskName, day, idx, val, isToday){
+  const row=document.createElement("div");
+  row.className="entry-row";
+  row.dataset.idx=idx;
+
+  const score=parseScore(val);
+  const pct=score&&score.max>0?(score.raw/score.max)*100:0;
+  const cls=score?scoreClass(pct):"empty";
+
+  if(isToday){
+    row.innerHTML=`
+      <input class="entry-input" type="text" value="${val}" placeholder="vd: 18/24" data-task="${taskName}" data-date="${day}" data-idx="${idx}">
+      <div class="entry-pct ${cls}" id="epct_${esc(taskName)}_${day}_${idx}">${score&&score.max>0?pct.toFixed(0)+"%":"—"}</div>
+      <button class="remove-btn" title="Xóa">✕</button>`;
+
+    const input=row.querySelector(".entry-input");
+    input.addEventListener("input",()=>{
+      const v=input.value.trim();
+      ensureDay(day,taskName);
+      // grow array if needed
+      while(DATA.__daily[day][taskName].length<=idx) DATA.__daily[day][taskName].push("");
+      DATA.__daily[day][taskName][idx]=v;
+
+      // update this row's %
+      const sc=parseScore(v);
+      const pctEl=document.getElementById(`epct_${esc(taskName)}_${day}_${idx}`);
+      if(sc&&sc.max>0){
+        const p=(sc.raw/sc.max)*100;
+        pctEl.textContent=p.toFixed(0)+"%";
+        pctEl.className=`entry-pct ${scoreClass(p)}`;
+      } else {
+        pctEl.textContent="—";
+        pctEl.className="entry-pct empty";
+      }
+      saveData();
+      updateDayBlock(taskName,day);
+      updateTaskTotal(taskName);
+      updateDashboard();
+    });
+
+    // Enter → add new row
+    input.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){
+        e.preventDefault();
+        ensureDay(TODAY,taskName);
+        DATA.__daily[TODAY][taskName].push("");
+        const newIdx=DATA.__daily[TODAY][taskName].length-1;
+        const list=document.getElementById(`list_${esc(taskName)}_${TODAY}`);
+        const newRow=buildEntryRow(taskName,TODAY,newIdx,"",true);
+        list.appendChild(newRow);
+        newRow.querySelector(".entry-input").focus();
+        saveData();
+      }
+    });
+
+    row.querySelector(".remove-btn").addEventListener("click",()=>{
+      ensureDay(day,taskName);
+      DATA.__daily[day][taskName].splice(idx,1);
+      saveData();
+      // rebuild this day block
+      refreshDayBlock(taskName,day);
+      updateTaskTotal(taskName);
+      updateDashboard();
+    });
+  } else {
+    // readonly past entry
+    row.innerHTML=`
+      <div style="font-size:12px;color:var(--muted);padding:2px 4px">${val||"—"}</div>
+      <div class="entry-pct ${cls}">${score&&score.max>0?pct.toFixed(0)+"%":"—"}</div>
+      <div></div>`;
+  }
+  return row;
+}
+
+function refreshDayBlock(taskName, day){
+  const old=document.getElementById(`block_${esc(taskName)}_${day}`);
+  if(!old) return;
+  const newBlock=buildDayBlock(taskName,day);
+  old.replaceWith(newBlock);
+}
+
+function updateDayBlock(taskName, day){
+  const entries=DATA.__daily[day]?.[taskName]||[];
+  const c=calcEntries(entries);
+  const valid=entries.filter(v=>parseScore(v));
+
+  const sumEl=document.getElementById(`summary_${esc(taskName)}_${day}`);
+  const totEl=document.getElementById(`daytot_${esc(taskName)}_${day}`);
+
+  if(c.cnt===0){
+    if(sumEl){ sumEl.textContent="—"; sumEl.className="day-block-summary empty"; }
+    if(totEl) totEl.innerHTML="";
+    return;
+  }
+  const cls=scoreClass(c.pct);
+  if(sumEl){ sumEl.textContent=`${c.pct.toFixed(1)}%`; sumEl.className=`day-block-summary ${cls}`; }
+  if(totEl) totEl.innerHTML=`
+    <span class="day-total-label">${c.cnt} bài · ${c.raw}/${c.max}</span>
+    <span class="tot-val ${cls}">TB: ${c.pct.toFixed(1)}%</span>`;
+}
+
+function updateTaskTotal(taskName){
+  const days=getAllDays();
+  let tr=0,tm=0,cnt=0;
+  days.forEach(d=>{
+    const entries=DATA.__daily[d]?.[taskName]||[];
+    const c=calcEntries(entries);
+    tr+=c.raw; tm+=c.max; cnt+=c.cnt;
+  });
+  const tp=tm>0?(tr/tm)*100:0;
+  const el=document.getElementById(`tot_${esc(taskName)}`);
+  if(el){
+    el.className=`tot-val ${scoreClass(tp)}`;
+    el.textContent=tm>0?`${cnt} bài · ${tr}/${tm} · TB ${tp.toFixed(1)}%`:"—";
+  }
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────
+function updateDashboard(){
+  const todayAcc=calcDayAccuracy(TODAY);
+  const allAcc=calcAllTimeAccuracy();
+  const pred=calcPrediction(allAcc.pct);
+  const streak=calcStreak();
+
+  document.getElementById("todayAccuracy").textContent=todayAcc.max>0?todayAcc.pct.toFixed(1)+"%":"—";
+  document.getElementById("todayAccuracy").className=`value ${scoreClass(todayAcc.pct)}`;
+  document.getElementById("overallAccuracy").textContent=allAcc.max>0?allAcc.pct.toFixed(1)+"%":"—";
+  document.getElementById("overallPrediction").textContent=pred.toFixed(0);
+  document.getElementById("overallPrediction").className=`value ${pred>=55?"good":pred>=45?"warn":"bad"}`;
+  document.getElementById("streakCount").textContent=`${streak} 🔥`;
+
+  // snapshot
+  const snap=DATA.__history.find(x=>x.date===TODAY);
+  const entry={date:TODAY,todayAccuracy:todayAcc.pct,accuracy:allAcc.pct,prediction:pred};
+  if(snap) Object.assign(snap,entry); else DATA.__history.push(entry);
+  DATA.__history.sort((a,b)=>a.date.localeCompare(b.date));
+  saveData();
+
+  renderGoalTracker(todayAcc.pct,allAcc.pct,pred);
+  renderStudyPlan();
+  renderCharts();
+  renderHistoryTable();
+  renderWeeklyReport();
+  renderStreakPanel();
+}
+
+// ─── GOAL TRACKER ─────────────────────────────────────────
+function renderGoalTracker(todayPct,allPct,pred){
+  const kpi=document.getElementById("todayKPI");
+  kpi.innerHTML=`
+    <div class="kpi-card">
+      <div class="kpi-title">Overall Prediction</div>
+      <div class="kpi-score ${pred>=55?"good":pred>=45?"warn":"bad"}">${pred.toFixed(0)} / 55</div>
+      <div class="kpi-sub">Còn thiếu ${Math.max(0,55-pred).toFixed(1)} điểm</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Hôm nay (${fmtDate(TODAY)})</div>
+      <div class="kpi-score ${scoreClass(todayPct)}">${todayPct>0?todayPct.toFixed(1)+"%":"Chưa nhập"}</div>
+      <div class="kpi-sub">Tổng tích lũy: ${allPct.toFixed(1)}%</div>
+    </div>`;
+
+  ADVANCED_GOALS.forEach(g=>{
+    const days=getAllDays(); let tr=0,tm=0,cnt=0;
+    days.forEach(d=>{ const c=calcEntries(DATA.__daily[d]?.[g.name]||[]); tr+=c.raw;tm+=c.max;cnt+=c.cnt; });
+    const pct=tm>0?(tr/tm)*100:0;
+    kpi.innerHTML+=`
+      <div class="kpi-card">
+        <div class="kpi-title">${g.name}</div>
+        <div class="kpi-score ${scoreClass(pct)}">${tm>0?pct.toFixed(1)+"%":"—"}</div>
+        <div class="kpi-sub">Target ${g.target}% · ${cnt} bài · Thiếu ${Math.max(0,g.target-pct).toFixed(1)}%</div>
+      </div>`;
+  });
+}
+
+// ─── STUDY PLAN ───────────────────────────────────────────
 function renderStudyPlan(){
-
-const box =
-document.getElementById(
-"studyPlan"
-);
-
-const day =
-new Date().getDay();
-
-// 0 CN
-// 1 T2
-// 2 T3
-// 3 T4
-// 4 T5
-// 5 T6
-// 6 T7
-
-let plan = [];
-
-let mode = "FULL";
-
-if(
-day===2 ||
-day===3 ||
-day===5
-){
-
-mode="LIGHT";
-
+  const NAMES=["CN","T2","T3","T4","T5","T6","T7"];
+  const day=new Date().getDay();
+  const mode=(day===2||day===3||day===5)?"LIGHT":"FULL";
+  const plan=mode==="LIGHT"
+    ?["Repeat Sentence (20)","Write From Dictation (20)","Read Aloud (15)","Reading & Writing FIB (10)","Fill In The Blanks (10)"]
+    :["Repeat Sentence (40)","Write From Dictation (40)","Read Aloud (30)","Reading & Writing FIB (25)","Fill In The Blanks (25)","Describe Image (15)","Retell Lecture (10)"];
+  document.getElementById("studyPlan").innerHTML=`
+    <span class="plan-badge ${mode}">${mode} — ${NAMES[day]}</span>
+    <ul class="plan-list">${plan.map(x=>`<li>${x}</li>`).join("")}</ul>`;
 }
 
-if(mode==="LIGHT"){
-
-plan=[
-
-"Repeat Sentence (20)",
-
-"Write From Dictation (20)",
-
-"Read Aloud (15)",
-
-"Reading & Writing FIB (10)",
-
-"Fill In The Blanks (10)"
-
-];
-
-}
-else{
-
-plan=[
-
-"Repeat Sentence (40)",
-
-"Write From Dictation (40)",
-
-"Read Aloud (30)",
-
-"Reading & Writing FIB (25)",
-
-"Fill In The Blanks (25)",
-
-"Describe Image (15)",
-
-"Retell Lecture (10)"
-
-];
-
-}
-
-box.innerHTML =
-
-`
-<div class="plan-day">
-
-<h3>
-Kế hoạch hôm nay
-</h3>
-
-<p>
-Chế độ:
-<b>${mode}</b>
-</p>
-
-<ul>
-
-${plan.map(
-x=>`<li>${x}</li>`
-).join("")}
-
-</ul>
-
-</div>
-`;
-
-}
-
-// ======================================
-// EXPORT JSON
-// ======================================
-
-document
-.getElementById(
-"exportJSON"
-)
-.addEventListener(
-"click",
-()=>{
-
-const blob =
-new Blob(
-
-[
-JSON.stringify(
-DATA,
-null,
-2
-)
-],
-
-{
-type:
-"application/json"
-}
-
-);
-
-const a =
-document.createElement(
-"a"
-);
-
-a.href =
-URL.createObjectURL(
-blob
-);
-
-a.download =
-"pte_tracker_backup.json";
-
-a.click();
-
-}
-);
-
-// ======================================
-// IMPORT JSON
-// ======================================
-
-document
-.getElementById(
-"importJSON"
-)
-.addEventListener(
-"click",
-()=>{
-
-document
-.getElementById(
-"importFile"
-)
-.click();
-
-}
-);
-
-document
-.getElementById(
-"importFile"
-)
-.addEventListener(
-"change",
-e=>{
-
-const file =
-e.target.files[0];
-
-if(!file) return;
-
-const reader =
-new FileReader();
-
-reader.onload =
-function(){
-
-const imported =
-
-JSON.parse(
-reader.result
-);
-
-Object.keys(imported)
-.forEach(k=>{
-
-DATA[k] =
-imported[k];
-
-});
-
-saveData(DATA);
-
-location.reload();
-
-};
-
-reader.readAsText(
-file
-);
-
-}
-);
-
-// ======================================
-// RESET
-// ======================================
-
-document
-.getElementById(
-"resetAll"
-)
-.addEventListener(
-"click",
-()=>{
-
-const ok =
-confirm(
-
-"Xóa toàn bộ dữ liệu?"
-
-);
-
-if(!ok) return;
-
-localStorage.removeItem(
-"pte_mvp_data"
-);
-
-location.reload();
-
-}
-);
-
-// ======================================
-// PATCH UPDATE
-// ======================================
-
-const oldUpdate =
-updateAll;
-
-updateAll =
-function(){
-
-oldUpdate();
-
-saveDailySnapshot();
-
-renderStudyPlan();
-
-renderGoalTracker();
-
-};
-
-// ======================================
-// INIT
-// ======================================
-
-renderStudyPlan();
-
-renderGoalTracker();
-
-saveDailySnapshot();
-
-updateAll();
-// ======================================
-// DAILY HISTORY
-// ======================================
-
-function getToday(){
-
-const d = new Date();
-
-const yyyy = d.getFullYear();
-
-const mm =
-String(
-d.getMonth()+1
-).padStart(2,"0");
-
-const dd =
-String(
-d.getDate()
-).padStart(2,"0");
-
-return `${yyyy}-${mm}-${dd}`;
-
-}
-
-if(!DATA.__history){
-
-DATA.__history = [];
-
-}
-
-function saveDailySnapshot(){
-
-let totalRaw = 0;
-let totalMax = 0;
-
-TASKS.forEach(task=>{
-
-const result =
-calculateTask(
-DATA[task[0]] || ""
-);
-
-totalRaw += result.raw;
-totalMax += result.max;
-
-});
-
-const accuracy =
-
-totalMax > 0
-
-?
-
-(totalRaw/totalMax)*100
-
-:
-
-0;
-
-const today =
-getToday();
-
-const existing =
-DATA.__history.find(
-x=>x.date===today
-);
-
-if(existing){
-
-existing.accuracy =
-accuracy;
-
-existing.prediction =
-calculatePrediction();
-
-}
-else{
-
-DATA.__history.push({
-
-date:today,
-
-accuracy:
-accuracy,
-
-prediction:
-calculatePrediction()
-
-});
-
-}
-
-saveData(DATA);
-
-}
-
-// ======================================
-// GOAL TRACKER
-// ======================================
-
-function renderGoalTracker(){
-
-let html =
-
-`
-<div class="kpi-card">
-
-<div class="kpi-title">
-Mục tiêu Overall
-</div>
-
-`;
-
-const overall =
-
-parseFloat(
-document
-.getElementById(
-"overallPrediction"
-)
-.innerText
-);
-
-const remain =
-
-Math.max(
-0,
-55-overall
-);
-
-html +=
-
-`
-<div class="kpi-score">
-${overall}
- / 55
-</div>
-
-<div>
-Còn thiếu:
-${remain.toFixed(1)}
-điểm
-</div>
-
-</div>
-`;
-
-const container =
-document.getElementById(
-"todayKPI"
-);
-
-container.insertAdjacentHTML(
-"beforeend",
-html
-);
-
-}
-
-// ======================================
-// STUDY PLAN
-// ======================================
-
-function renderStudyPlan(){
-
-const box =
-document.getElementById(
-"studyPlan"
-);
-
-const day =
-new Date().getDay();
-
-// 0 CN
-// 1 T2
-// 2 T3
-// 3 T4
-// 4 T5
-// 5 T6
-// 6 T7
-
-let plan = [];
-
-let mode = "FULL";
-
-if(
-day===2 ||
-day===3 ||
-day===5
-){
-
-mode="LIGHT";
-
-}
-
-if(mode==="LIGHT"){
-
-plan=[
-
-"Repeat Sentence (20)",
-
-"Write From Dictation (20)",
-
-"Read Aloud (15)",
-
-"Reading & Writing FIB (10)",
-
-"Fill In The Blanks (10)"
-
-];
-
-}
-else{
-
-plan=[
-
-"Repeat Sentence (40)",
-
-"Write From Dictation (40)",
-
-"Read Aloud (30)",
-
-"Reading & Writing FIB (25)",
-
-"Fill In The Blanks (25)",
-
-"Describe Image (15)",
-
-"Retell Lecture (10)"
-
-];
-
-}
-
-box.innerHTML =
-
-`
-<div class="plan-day">
-
-<h3>
-Kế hoạch hôm nay
-</h3>
-
-<p>
-Chế độ:
-<b>${mode}</b>
-</p>
-
-<ul>
-
-${plan.map(
-x=>`<li>${x}</li>`
-).join("")}
-
-</ul>
-
-</div>
-`;
-
-}
-
-// ======================================
-// EXPORT JSON
-// ======================================
-
-document
-.getElementById(
-"exportJSON"
-)
-.addEventListener(
-"click",
-()=>{
-
-const blob =
-new Blob(
-
-[
-JSON.stringify(
-DATA,
-null,
-2
-)
-],
-
-{
-type:
-"application/json"
-}
-
-);
-
-const a =
-document.createElement(
-"a"
-);
-
-a.href =
-URL.createObjectURL(
-blob
-);
-
-a.download =
-"pte_tracker_backup.json";
-
-a.click();
-
-}
-);
-
-// ======================================
-// IMPORT JSON
-// ======================================
-
-document
-.getElementById(
-"importJSON"
-)
-.addEventListener(
-"click",
-()=>{
-
-document
-.getElementById(
-"importFile"
-)
-.click();
-
-}
-);
-
-document
-.getElementById(
-"importFile"
-)
-.addEventListener(
-"change",
-e=>{
-
-const file =
-e.target.files[0];
-
-if(!file) return;
-
-const reader =
-new FileReader();
-
-reader.onload =
-function(){
-
-const imported =
-
-JSON.parse(
-reader.result
-);
-
-Object.keys(imported)
-.forEach(k=>{
-
-DATA[k] =
-imported[k];
-
-});
-
-saveData(DATA);
-
-location.reload();
-
-};
-
-reader.readAsText(
-file
-);
-
-}
-);
-
-// ======================================
-// RESET
-// ======================================
-
-document
-.getElementById(
-"resetAll"
-)
-.addEventListener(
-"click",
-()=>{
-
-const ok =
-confirm(
-
-"Xóa toàn bộ dữ liệu?"
-
-);
-
-if(!ok) return;
-
-localStorage.removeItem(
-"pte_mvp_data"
-);
-
-location.reload();
-
-}
-);
-
-// ======================================
-// PATCH UPDATE
-// ======================================
-
-const oldUpdate =
-updateAll;
-
-updateAll =
-function(){
-
-oldUpdate();
-
-saveDailySnapshot();
-
-renderStudyPlan();
-
-renderGoalTracker();
-
-};
-
-// ======================================
-// INIT
-// ======================================
-
-renderStudyPlan();
-
-renderGoalTracker();
-
-saveDailySnapshot();
-
-updateAll();
-// ======================================
-// CHART CONTAINERS
-// ======================================
-
-if(!document.getElementById("historyPanel")){
-
-const chartPanel =
-document.createElement("div");
-
-chartPanel.className = "section";
-
-chartPanel.id = "historyPanel";
-
-chartPanel.innerHTML = `
-
-<h2>
-Biểu đồ tiến bộ
-</h2>
-
-<canvas
-id="progressChart"
-height="120">
-</canvas>
-
-<br>
-
-<canvas
-id="predictionChart"
-height="120">
-</canvas>
-
-`;
-
-document
-.querySelector(".container")
-.appendChild(chartPanel);
-
-}
-
-// ======================================
-// CHARTS
-// ======================================
-
-let progressChart = null;
-let predictionChart = null;
-
+// ─── CHARTS ───────────────────────────────────────────────
+let accChart=null,predChart=null;
 function renderCharts(){
+  const hist=DATA.__history; if(!hist||!hist.length) return;
+  const labels=hist.map(x=>fmtDate(x.date));
+  const todayData=hist.map(x=>+((x.todayAccuracy||0).toFixed(1)));
+  const allData=hist.map(x=>+x.accuracy.toFixed(1));
+  const predData=hist.map(x=>+x.prediction.toFixed(1));
+  const grid="#1e293b",tick="#64748b";
+  const baseOpts={responsive:true,plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{x:{ticks:{color:tick},grid:{color:grid}},y:{ticks:{color:tick},grid:{color:grid}}}};
 
-if(!DATA.__history){
+  const ctx1=document.getElementById("accuracyChart").getContext("2d");
+  if(accChart) accChart.destroy();
+  accChart=new Chart(ctx1,{type:"line",data:{labels,datasets:[
+    {label:"Acc hôm đó %",data:todayData,tension:.3,borderColor:"#38bdf8",backgroundColor:"rgba(56,189,248,.08)",fill:true,pointRadius:3},
+    {label:"Acc tích lũy %",data:allData,tension:.3,borderColor:"#22c55e",backgroundColor:"transparent",borderDash:[4,4],pointRadius:2}
+  ]},options:baseOpts});
 
-return;
-
+  const ctx2=document.getElementById("predictionChart").getContext("2d");
+  if(predChart) predChart.destroy();
+  predChart=new Chart(ctx2,{type:"line",data:{labels,datasets:[
+    {label:"Prediction",data:predData,tension:.3,borderColor:"#a78bfa",backgroundColor:"rgba(167,139,250,.08)",fill:true,pointRadius:3},
+    {label:"Mục tiêu 55",data:Array(labels.length).fill(55),borderColor:"#ef4444",borderDash:[6,3],pointRadius:0}
+  ]},options:baseOpts});
 }
 
-const labels =
-DATA.__history.map(
-x=>x.date
-);
-
-const accuracyData =
-DATA.__history.map(
-x=>Number(
-x.accuracy.toFixed(1)
-)
-);
-
-const predictionData =
-DATA.__history.map(
-x=>Number(
-x.prediction.toFixed(1)
-)
-);
-
-// ==========================
-// ACCURACY CHART
-// ==========================
-
-const ctx1 =
-document
-.getElementById(
-"progressChart"
-)
-.getContext("2d");
-
-if(progressChart){
-
-progressChart.destroy();
-
+// ─── HISTORY TABLE ────────────────────────────────────────
+function renderHistoryTable(){
+  const tbody=document.getElementById("historyTableBody");
+  const hist=[...(DATA.__history||[])].reverse();
+  tbody.innerHTML=hist.map(h=>{
+    const dd=DATA.__daily[h.date]||{};
+    let totalEntries=0;
+    Object.values(dd).forEach(arr=>{ if(Array.isArray(arr)) totalEntries+=arr.filter(v=>parseScore(v)).length; });
+    const isT=h.date===TODAY;
+    return `<tr class="${isT?"today-row":""}">
+      <td>${h.date}${isT?" 📍":""}</td>
+      <td>${(h.todayAccuracy||0).toFixed(1)}%</td>
+      <td>${h.accuracy.toFixed(1)}%</td>
+      <td>${h.prediction.toFixed(1)}</td>
+      <td>${totalEntries} bài</td>
+    </tr>`;
+  }).join("");
 }
 
-progressChart =
-new Chart(ctx1,{
-
-type:"line",
-
-data:{
-
-labels,
-
-datasets:[{
-
-label:
-"Accuracy %",
-
-data:
-accuracyData,
-
-tension:0.3
-
-}]
-
-},
-
-options:{
-
-responsive:true,
-
-plugins:{
-
-legend:{
-display:true
+// ─── WEEKLY REPORT ────────────────────────────────────────
+function renderWeeklyReport(){
+  const box=document.getElementById("weeklyReport");
+  const hist=DATA.__history;
+  if(!hist||hist.length<2){ box.innerHTML='<p style="color:var(--muted);font-size:13px">Cần ít nhất 2 ngày dữ liệu.</p>'; return; }
+  const week=hist.slice(-7);
+  const first=week[0],last=week[week.length-1];
+  const predChange=last.prediction-first.prediction;
+  const accChange=last.accuracy-first.accuracy;
+  const avgAcc=week.reduce((s,x)=>s+(x.todayAccuracy||0),0)/week.length;
+  const activeDays=week.filter(x=>(x.todayAccuracy||0)>0).length;
+  let totalEntries=0;
+  week.forEach(h=>{ const dd=DATA.__daily[h.date]||{}; Object.values(dd).forEach(arr=>{ if(Array.isArray(arr)) totalEntries+=arr.filter(v=>parseScore(v)).length; }); });
+  const chgClass=v=>v>0?"up":v<0?"down":"flat";
+  const chgSign=v=>v>0?"+":"";
+  box.innerHTML=`
+    <p style="color:var(--muted);font-size:12px;margin-bottom:10px">7 ngày gần nhất (${fmtDate(first.date)} → ${fmtDate(last.date)})</p>
+    <div class="report-grid">
+      <div class="report-card"><div class="report-title">Prediction thay đổi</div><div class="report-val ${chgClass(predChange)}">${chgSign(predChange)}${predChange.toFixed(1)} điểm</div></div>
+      <div class="report-card"><div class="report-title">Acc tích lũy thay đổi</div><div class="report-val ${chgClass(accChange)}">${chgSign(accChange)}${accChange.toFixed(1)}%</div></div>
+      <div class="report-card"><div class="report-title">Avg acc / ngày</div><div class="report-val ${scoreClass(avgAcc)}">${avgAcc.toFixed(1)}%</div></div>
+      <div class="report-card"><div class="report-title">Ngày có luyện tập</div><div class="report-val">${activeDays} / ${week.length} ngày</div></div>
+      <div class="report-card"><div class="report-title">Tổng bài đã nhập</div><div class="report-val">${totalEntries} bài</div></div>
+      <div class="report-card"><div class="report-title">Cần tăng thêm</div><div class="report-val ${chgClass(0)}">${Math.max(0,55-last.prediction).toFixed(1)} điểm</div></div>
+    </div>`;
 }
 
+// ─── STREAK ───────────────────────────────────────────────
+function renderStreakPanel(){
+  const box=document.getElementById("streakPanel");
+  const streak=calcStreak();
+  const dots=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date(TODAY); d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    const a=calcDayAccuracy(key);
+    dots.push(`<div class="streak-dot ${a.max>0?"active":"inactive"}${key===TODAY?" today-dot":""}" title="${key}"></div>`);
+  }
+  box.innerHTML=`
+    <p style="font-size:13px;margin-bottom:10px">Streak: <strong style="color:var(--green)">${streak} ngày 🔥</strong></p>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">30 ngày gần nhất</p>
+    <div class="streak-bar">${dots.join("")}</div>`;
 }
 
-}
-
+// ─── TABS ─────────────────────────────────────────────────
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    ["chart","table","weekly","streak"].forEach(id=>{ document.getElementById(`tab-${id}`).style.display="none"; });
+    const t=tab.dataset.tab;
+    document.getElementById(`tab-${t}`).style.display="block";
+    if(t==="chart") renderCharts();
+  });
 });
 
-// ==========================
-// PREDICTION CHART
-// ==========================
-
-const ctx2 =
-document
-.getElementById(
-"predictionChart"
-)
-.getContext("2d");
-
-if(predictionChart){
-
-predictionChart.destroy();
-
-}
-
-predictionChart =
-new Chart(ctx2,{
-
-type:"line",
-
-data:{
-
-labels,
-
-datasets:[{
-
-label:
-"Overall Prediction",
-
-data:
-predictionData,
-
-tension:0.3
-
-}]
-
-},
-
-options:{
-
-responsive:true,
-
-plugins:{
-
-legend:{
-display:true
-}
-
-}
-
-}
-
+// ─── EXPORT / IMPORT / RESET ──────────────────────────────
+document.getElementById("exportJSON").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`pte_backup_${TODAY}.json`; a.click();
+});
+document.getElementById("importJSON").addEventListener("click",()=>{ document.getElementById("importFile").click(); });
+document.getElementById("importFile").addEventListener("change",e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const imp=JSON.parse(r.result); Object.keys(imp).forEach(k=>{ DATA[k]=imp[k]; }); saveData(); location.reload(); }catch{ alert("File JSON không hợp lệ!"); } };
+  r.readAsText(file);
+});
+document.getElementById("exportCSV").addEventListener("click",()=>{
+  const days=getAllDays().reverse();
+  let csv="Date,Task,Bai,Score,Pct,TodayAccuracy,AllAccuracy,Prediction\n";
+  days.forEach(day=>{
+    const tAcc=calcDayAccuracy(day);
+    let tr2=0,tm2=0;
+    getAllDays().filter(d=>d<=day).forEach(d=>{ const a=calcDayAccuracy(d); tr2+=a.raw; tm2+=a.max; });
+    const allPct=tm2>0?(tr2/tm2)*100:0;
+    const pred=calcPrediction(allPct);
+    const dd=DATA.__daily[day]||{};
+    let hasRows=false;
+    Object.entries(dd).forEach(([task,arr])=>{
+      (arr||[]).forEach((v,i)=>{
+        const sc=parseScore(v);
+        const pct=sc&&sc.max>0?(sc.raw/sc.max)*100:0;
+        csv+=`${day},"${task}",${i+1},"${v}",${pct.toFixed(2)},${tAcc.pct.toFixed(2)},${allPct.toFixed(2)},${pred.toFixed(2)}\n`;
+        hasRows=true;
+      });
+    });
+    if(!hasRows) csv+=`${day},,,,, ${tAcc.pct.toFixed(2)},${allPct.toFixed(2)},${pred.toFixed(2)}\n`;
+  });
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`pte_scores_${TODAY}.csv`; a.click();
+});
+document.getElementById("resetAll").addEventListener("click",()=>{
+  if(!confirm("Xóa toàn bộ dữ liệu? Không thể khôi phục!")) return;
+  localStorage.removeItem("pte_v4"); location.reload();
 });
 
-}
-
-// ======================================
-// CSV EXPORT
-// ======================================
-
-document
-.getElementById(
-"exportCSV"
-)
-.addEventListener(
-"click",
-()=>{
-
-let csv =
-"Task,Raw,Max,Accuracy\n";
-
-TASKS.forEach(task=>{
-
-const name =
-task[0];
-
-const result =
-calculateTask(
-DATA[name] || ""
-);
-
-csv +=
-
-`"${name}",${result.raw},${result.max},${result.accuracy.toFixed(2)}\n`;
-
-});
-
-const blob =
-new Blob(
-[csv],
-{
-type:
-"text/csv"
-}
-);
-
-const a =
-document.createElement(
-"a"
-);
-
-a.href =
-URL.createObjectURL(
-blob
-);
-
-a.download =
-"pte_scores.csv";
-
-a.click();
-
-}
-);
-
-// ======================================
-// ADVANCED GOAL TRACKER
-// ======================================
-
-function renderAdvancedGoals(){
-
-const kpi =
-document.getElementById(
-"todayKPI"
-);
-
-const goals = [
-
-{
-name:"Repeat Sentence",
-target:70
-},
-
-{
-name:"Write From Dictation",
-target:70
-},
-
-{
-name:"Read Aloud",
-target:75
-},
-
-{
-name:"Reading & Writing FIB",
-target:70
-},
-
-{
-name:"Fill In The Blanks",
-target:70
-}
-
-];
-
-goals.forEach(g=>{
-
-const result =
-calculateTask(
-DATA[g.name] || ""
-);
-
-const remain =
-
-Math.max(
-0,
-g.target -
-result.accuracy
-);
-
-const div =
-document.createElement(
-"div"
-);
-
-div.className =
-"kpi-card";
-
-div.innerHTML =
-
-`
-<div class="kpi-title">
-${g.name}
-</div>
-
-<div class="kpi-score">
-${result.accuracy.toFixed(1)}%
-</div>
-
-<div>
-Target:
-${g.target}%
-</div>
-
-<div>
-Thiếu:
-${remain.toFixed(1)}%
-</div>
-`;
-
-kpi.appendChild(div);
-
-});
-
-}
-
-// ======================================
-// WEEKLY REPORT
-// ======================================
-
-function generateWeeklyReport(){
-
-if(
-!DATA.__history ||
-DATA.__history.length < 2
-){
-
-return;
-
-}
-
-const first =
-DATA.__history[0];
-
-const last =
-DATA.__history[
-DATA.__history.length-1
-];
-
-const improve =
-
-last.prediction -
-first.prediction;
-
-console.log(
-
-"Weekly Progress:",
-improve
-
-);
-
-}
-
-// ======================================
-// PATCH UPDATE
-// ======================================
-
-const updateAllBackup =
-updateAll;
-
-updateAll =
-function(){
-
-updateAllBackup();
-
-renderCharts();
-
-renderAdvancedGoals();
-
-generateWeeklyReport();
-
-};
-
-// ======================================
-// INIT
-// ======================================
-
-renderCharts();
-
-renderAdvancedGoals();
-
-generateWeeklyReport();
-
-updateAll();
+// ─── BOOT ─────────────────────────────────────────────────
+buildTaskCards();
+updateDashboard();
 </script>
+</body>
+</html>
