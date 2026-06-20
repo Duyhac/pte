@@ -251,7 +251,7 @@ const TODAY = getToday();
 function fmtDate(s){ const[,m,d]=s.split("-"); return `${d}/${m}`; }
 
 function parseScore(v){
-  const m=(v||"").trim().match(/^(\d+)\s*\/\s*(\d+)$/);
+  const m=(v||"").trim().match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
   return m?{raw:+m[1],max:+m[2]}:null;
 }
 
