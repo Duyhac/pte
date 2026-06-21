@@ -154,11 +154,6 @@ canvas{ max-height:170px; }
 </head>
 <body>
 
-<div style="background:#14532d;color:white;padding:12px;border-radius:10px;margin:10px 0">
-<b>PTE V6 Upgrade</b><br>
-Estimated PTE Score (10-90 scale) enabled.
-Target: 55+
-</div>
 
 <div class="container">
 
@@ -353,11 +348,11 @@ function calcWeightedPrediction(dayList){
       weightUsed  += w;
     }
   });
-  if(weightUsed===0) return 30;
+  if(weightUsed===0) return 0;
   // scale: nếu làm đủ tất cả task ở 100% acc → 90 điểm
   // baseline 30, range 60
   const ratio = weightedSum / weightUsed; // 0..1
-  return 30 + ratio * 60;
+  return ratio * 90;
 }
 
 // Raw accuracy toàn bộ entries trên dayList
