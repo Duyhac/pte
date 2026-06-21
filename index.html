@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PTE 55 Tracker</title>
+<title>PTE 55 Tracker v2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#0f172a; --card:#1e293b; --text:#f8fafc;
   --muted:#94a3b8; --accent:#38bdf8;
   --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --purple:#a78bfa;
+  --orange:#fb923c;
 }
 *{ margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
 body{ background:var(--bg); color:var(--text); padding:20px; }
@@ -18,7 +19,7 @@ h1{ margin-bottom:4px; font-size:22px; }
 .subtitle{ color:var(--muted); margin-bottom:16px; font-size:13px; }
 
 /* FILTER TABS */
-.filter-bar{ display:flex; gap:8px; margin-bottom:18px; }
+.filter-bar{ display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
 .filter-btn{ padding:6px 18px; border-radius:20px; font-size:13px; cursor:pointer; background:#1e293b; color:var(--muted); border:1px solid #334155; font-weight:bold; }
 .filter-btn.active{ background:var(--accent); color:#0f172a; border-color:var(--accent); }
 
@@ -52,16 +53,55 @@ button.danger{ background:var(--red); color:white; }
 .kpi-score.na{ color:var(--muted); }
 .kpi-sub{ font-size:11px; color:var(--muted); }
 
-/* STUDY PLAN */
-.plan-wrap{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
+/* ── PRIORITY DASHBOARD ── */
+.priority-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.priority-card{ background:#111827; border-radius:10px; padding:12px; border-left:3px solid var(--red); }
+.priority-card.p-warn{ border-left-color:var(--yellow); }
+.priority-card.p-good{ border-left-color:var(--green); }
+.priority-card.p-ok{ border-left-color:#334155; }
+.priority-card-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.priority-task-name{ font-size:13px; font-weight:bold; }
+.priority-badge{ font-size:10px; padding:2px 8px; border-radius:10px; font-weight:bold; }
+.priority-badge.CRITICAL{ background:#ef444422; color:var(--red); }
+.priority-badge.FOCUS{ background:#f59e0b22; color:var(--yellow); }
+.priority-badge.MAINTAIN{ background:#22c55e22; color:var(--green); }
+.priority-badge.REST{ background:#94a3b822; color:var(--muted); }
+.priority-bar-bg{ background:#1e293b; border-radius:4px; height:6px; margin:5px 0; overflow:hidden; }
+.priority-bar-fill{ height:6px; border-radius:4px; }
+.priority-meta{ font-size:10px; color:var(--muted); display:flex; justify-content:space-between; }
+.priority-action{ font-size:11px; margin-top:6px; padding:4px 8px; border-radius:6px; background:#1e293b; color:var(--accent); }
+
+/* ── ADAPTIVE PLAN ── */
+.plan-wrap{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
 .plan-day-card{ background:#111827; border-radius:10px; padding:12px; }
 .plan-day-card.today-plan{ border:1px solid var(--accent); }
 .plan-day-title{ font-size:12px; font-weight:bold; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; }
 .plan-day-badge{ font-size:10px; padding:1px 7px; border-radius:10px; }
-.plan-day-badge.daily{ background:#22c55e22; color:var(--green); }
 .plan-day-badge.today{ background:var(--accent); color:#0f172a; }
-.plan-tasks{ font-size:11px; color:var(--muted); line-height:1.8; }
+.plan-tasks{ font-size:11px; color:var(--muted); line-height:1.9; }
 .plan-tasks .daily-tag{ color:var(--green); font-weight:bold; }
+.plan-tasks .boost-tag{ color:var(--red); font-weight:bold; }
+.plan-tasks .rest-tag{ color:#475569; text-decoration:line-through; }
+.adapt-legend{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:10px; font-size:11px; color:var(--muted); }
+.adapt-legend span{ display:flex; align-items:center; gap:4px; }
+
+/* ── 30-DAY ROADMAP ── */
+.roadmap-wrap{ overflow-x:auto; }
+.roadmap-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; min-width:560px; }
+.roadmap-cell{ background:#111827; border-radius:6px; padding:6px 4px; font-size:10px; text-align:center; min-height:64px; position:relative; }
+.roadmap-cell.past{ opacity:.6; }
+.roadmap-cell.today-cell{ border:2px solid var(--accent); }
+.roadmap-cell.exam-cell{ border:2px solid var(--red); background:#ef444415; }
+.roadmap-cell-date{ color:var(--muted); margin-bottom:2px; }
+.roadmap-cell-focus{ font-weight:bold; font-size:9px; color:var(--accent); margin-bottom:2px; }
+.roadmap-cell-tasks{ font-size:9px; color:#475569; line-height:1.5; }
+.roadmap-cell-dot{ width:6px; height:6px; border-radius:50%; display:inline-block; margin:1px; }
+.roadmap-week-label{ font-size:10px; color:var(--muted); padding:4px; text-align:center; background:#0a1020; border-radius:4px; display:flex; align-items:center; justify-content:center; }
+.roadmap-header{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; min-width:560px; margin-bottom:4px; }
+.roadmap-header-cell{ font-size:10px; color:var(--muted); text-align:center; padding:4px; }
+
+/* STUDY PLAN */
+.plan-tasks .task-dot{ display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:4px; vertical-align:middle; }
 
 /* TASK GRID */
 .task-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:12px; }
@@ -148,17 +188,29 @@ button.danger{ background:var(--red); color:white; }
 .pred-bar-bg{ background:#1e293b; border-radius:6px; height:10px; overflow:hidden; margin-top:4px; }
 .pred-bar-fill{ height:10px; border-radius:6px; transition:width .5s; }
 
+/* SKILL BARS */
+.skill-bars{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-top:10px; }
+.skill-bar-item{ background:#111827; border-radius:8px; padding:10px 12px; }
+.skill-bar-label{ display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
+.skill-bar-name{ color:var(--muted); }
+.skill-bar-val{ font-weight:bold; }
+.skill-bar-bg{ background:#1e293b; border-radius:4px; height:7px; overflow:hidden; }
+.skill-bar-fill{ height:7px; border-radius:4px; transition:width .6s; }
+
 canvas{ max-height:170px; }
 @media(max-width:700px){ .dashboard{ grid-template-columns:repeat(2,1fr); } }
+
+/* ADAPT BADGE on task card */
+.adapt-badge{ font-size:9px; padding:1px 6px; border-radius:8px; margin-left:6px; vertical-align:middle; }
+.adapt-badge.boost{ background:#ef444422; color:var(--red); }
+.adapt-badge.reduce{ background:#22c55e22; color:var(--green); }
 </style>
 </head>
 <body>
-
-
 <div class="container">
 
-<h1>🎯 PTE 55 MASTER TRACKER</h1>
-<div class="subtitle">PTE Academic • Mục tiêu 55+ • Thi <strong>20/07/2026</strong> • Hôm nay: <span id="todayLabel">—</span></div>
+<h1>🎯 PTE 55 MASTER TRACKER <span style="font-size:13px;color:var(--muted);font-weight:normal">v2.0 — Adaptive</span></h1>
+<div class="subtitle">PTE Academic · Mục tiêu 55+ · Thi <strong>20/07/2026</strong> · Hôm nay: <span id="todayLabel">—</span> · Còn <span id="daysLeftInline">—</span> ngày</div>
 
 <!-- FILTER BAR -->
 <div class="filter-bar">
@@ -170,12 +222,25 @@ canvas{ max-height:170px; }
 <!-- DASHBOARD -->
 <div class="dashboard">
   <div class="card"><div class="label">Ngày còn lại</div><div class="value" id="daysLeft">—</div></div>
-  <div class="card"><div class="label">Overall Prediction</div><div class="value" id="overallPrediction">—</div>
-    <div class="pred-bar-wrap"><div class="pred-bar-bg"><div class="pred-bar-fill" id="predBar" style="width:0%;background:var(--red)"></div></div></div>
+  <div class="card">
+    <div class="label">PTE Score Prediction</div>
+    <div class="value" id="overallPrediction">—</div>
+    <div class="pred-bar-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:2px">
+        <span>10</span><span>Target 55</span><span>90</span>
+      </div>
+      <div class="pred-bar-bg" style="position:relative">
+        <div class="pred-bar-fill" id="predBar" style="width:0%;background:var(--red)"></div>
+        <div style="position:absolute;top:0;left:55.6%;width:2px;height:100%;background:#ef4444;opacity:.7"></div>
+      </div>
+    </div>
   </div>
-  <div class="card"><div class="label">Weighted Score</div><div class="value" id="weightedScore">—</div></div>
   <div class="card"><div class="label">Raw Accuracy</div><div class="value" id="overallAccuracy">—</div></div>
-  <div class="card"><div class="label">Streak</div><div class="value" id="streakCount">0 🔥</div></div><div class="card"><div class="label">Speaking</div><div class="value" id="skillSpeaking">—</div></div><div class="card"><div class="label">Writing</div><div class="value" id="skillWriting">—</div></div><div class="card"><div class="label">Reading</div><div class="value" id="skillReading">—</div></div><div class="card"><div class="label">Listening</div><div class="value" id="skillListening">—</div></div>
+  <div class="card"><div class="label">Streak</div><div class="value" id="streakCount">0 🔥</div></div>
+  <div class="card"><div class="label">Speaking</div><div class="value" id="skillSpeaking">—</div></div>
+  <div class="card"><div class="label">Writing</div><div class="value" id="skillWriting">—</div></div>
+  <div class="card"><div class="label">Reading</div><div class="value" id="skillReading">—</div></div>
+  <div class="card"><div class="label">Listening</div><div class="value" id="skillListening">—</div></div>
 </div>
 
 <!-- BUTTONS -->
@@ -187,16 +252,40 @@ canvas{ max-height:170px; }
   <input type="file" id="importFile" accept=".json" style="display:none">
 </div>
 
+<!-- PRIORITY DASHBOARD -->
+<div class="section">
+  <h2>🚨 Priority Dashboard — <span id="priorityRangeLabel">Hôm nay</span></h2>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:12px">Rank theo: urgency = gap đến target × trọng số overall. CRITICAL = cần tập trung ngay.</p>
+  <div id="priorityGrid" class="priority-grid"></div>
+</div>
+
 <!-- GOAL TRACKER -->
 <div class="section">
   <h2>🎯 Goal Tracker — <span id="rangeLabel">Hôm nay</span></h2>
   <div id="todayKPI" class="kpi-grid"></div>
+  <div class="skill-bars" id="skillBarsEl"></div>
 </div>
 
-<!-- STUDY PLAN -->
+<!-- ADAPTIVE STUDY PLAN -->
 <div class="section">
-  <h2>📋 Lịch học 7 ngày/tuần</h2>
+  <h2>📋 Adaptive Study Plan — Tuần này <span style="font-size:11px;color:var(--muted);font-weight:normal">(tự động điều chỉnh số bài theo điểm yếu + giờ học thật của em)</span></h2>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">⏱ T3/T4/T6 (đi học): ~4h luyện · Các ngày khác: ~9h luyện. Số bài (×N) mỗi task được tính tự động để lấp đầy thời gian đó, ưu tiên task có gap lớn × weight cao.</p>
+  <div class="adapt-legend">
+    <span><span style="color:var(--red)">🔴</span> BOOST — task yếu, tăng luyện</span>
+    <span><span style="color:var(--green)">⭐</span> Daily — làm mỗi ngày</span>
+    <span><span style="color:var(--muted);text-decoration:line-through">strikethrough</span> — đã vượt target, giảm tải</span>
+    <span><span style="color:var(--accent)">📍</span> Hôm nay</span>
+  </div>
   <div id="studyPlan" class="plan-wrap"></div>
+</div>
+
+<!-- 30-DAY ROADMAP -->
+<div class="section">
+  <h2>🗓 Kế hoạch 30 ngày đến ngày thi</h2>
+  <div class="roadmap-wrap">
+    <div class="roadmap-header" id="roadmapHeader"></div>
+    <div class="roadmap-grid" id="roadmapGrid"></div>
+  </div>
 </div>
 
 <!-- TASKS -->
@@ -216,11 +305,12 @@ canvas{ max-height:170px; }
   </div>
   <div id="tab-chart">
     <canvas id="accuracyChart" height="70"></canvas><br>
-    <canvas id="predictionChart" height="70"></canvas><br><canvas id="skillRadarChart" height="70"></canvas>
+    <canvas id="predictionChart" height="70"></canvas><br>
+    <canvas id="skillRadarChart" height="70"></canvas>
   </div>
   <div id="tab-table" style="display:none">
     <table class="history-table">
-      <thead><tr><th>Ngày</th><th>Acc hôm đó</th><th>Weighted Pred</th><th>Raw Acc tích lũy</th><th>Số bài</th></tr></thead>
+      <thead><tr><th>Ngày</th><th>Acc hôm đó</th><th>PTE Prediction</th><th>Acc tích lũy</th><th>Số bài</th></tr></thead>
       <tbody id="historyTableBody"></tbody>
     </table>
   </div>
@@ -228,90 +318,148 @@ canvas{ max-height:170px; }
   <div id="tab-streak" style="display:none"><div id="streakPanel"></div></div>
 </div>
 
-</div><!-- /container -->
+</div>
 <script>
-// ══════════════════════════════════════════════════════════
-// TASK DEFINITIONS — 22 tasks với trọng số Overall từ ảnh
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// TASK DEFINITIONS — 22 tasks
+// [id, EN name, VI name, overall%, skill, scheduleDOW[]]
+// ════════════════════════════════════════════════════════════
 const TASKS = [
-  // [id, tên EN, tên VI, overall%, skill, ngày trong tuần (0=CN,1=T2...)]
   ["RA",  "Read Aloud",               "Đọc thành tiếng",          4,  "speaking",  [1,2,3,4,5,6,0]],
-  ["RS",  "Repeat Sentence",          "Nhắc lại câu",             7,  "speaking",  [1,2,3,4,5,6,0]], // daily
+  ["RS",  "Repeat Sentence",          "Nhắc lại câu",             7,  "speaking",  [1,2,3,4,5,6,0]],
   ["DI",  "Describe Image",           "Mô tả hình ảnh",           15, "speaking",  [1]],
   ["RL",  "Retell Lecture",           "Kể lại bài giảng",         6,  "speaking",  [1]],
   ["ASQ", "Answer Short Question",    "Trả lời câu hỏi ngắn",     2,  "speaking",  [2]],
-  ["SGD", "Summarize Group Discuss",  "Tóm tắt thảo luận nhóm",  9,  "speaking",  [2]],
+  ["SGD", "Summarise Group Discuss",  "Tóm tắt thảo luận nhóm",   9,  "speaking",  [2]],
   ["RTS", "Respond To Situation",     "Phản hồi tình huống",      6,  "speaking",  [2]],
   ["SWT", "Summarize Written Text",   "Tóm tắt văn bản viết",    7,  "writing",   [3]],
   ["WE",  "Write Essay",              "Viết luận",                7,  "writing",   [3]],
-  ["FIB", "FIB – Dropdown",          "Điền từ (dropdown)",       7,  "reading",   [3,4]],
-  ["MRM", "MCQ Reading Multiple",     "Đọc MCQ nhiều đáp án",    1,  "reading",   [4]],
+  ["FIB", "FIB – Dropdown",           "Điền từ (dropdown)",       7,  "reading",   [3,4]],
+  ["MRM", "MCQ Reading Multiple",     "Đọc MCQ nhiều đáp án",     1,  "reading",   [4]],
   ["ROP", "Re-order Paragraphs",      "Sắp xếp đoạn văn",        3,  "reading",   [4]],
-  ["FDD", "FIB – Drag & Drop",       "Kéo thả điền từ",         6,  "reading",   [4]],
-  ["MRS", "MCQ Reading Single",       "Đọc MCQ một đáp án",      1,  "reading",   [5]],
+  ["FDD", "FIB – Drag & Drop",        "Kéo thả điền từ",         6,  "reading",   [4]],
+  ["MRS", "MCQ Reading Single",       "Đọc MCQ một đáp án",       1,  "reading",   [5]],
   ["SST", "Summarize Spoken Text",    "Tóm tắt bài nghe",        4,  "listening", [5]],
   ["MLM", "MCQ Listening Multiple",   "Nghe MCQ nhiều đáp án",   1,  "listening", [5]],
   ["FIL", "Fill In The Blanks",       "Điền từ bài nghe",        3,  "listening", [6]],
   ["HCS", "Highlight Correct Summary","Chọn tóm tắt đúng",       1,  "listening", [6]],
   ["SMW", "Select Missing Word",      "Chọn từ bị thiếu",        1,  "listening", [6]],
   ["HIW", "Highlight Incorrect Words","Tô từ sai",               4,  "listening", [0]],
-  ["WFD", "Write From Dictation",     "Nghe và viết lại",        5,  "listening", [1,2,3,4,5,6,0]], // daily
+  ["WFD", "Write From Dictation",     "Nghe và viết lại",        5,  "listening", [1,2,3,4,5,6,0]],
   ["IP",  "Integrated Practice",      "Luyện tích hợp",          1,  "mixed",     [0]],
 ];
 
-// Trọng số theo skill cho prediction
-// Speaking 36%, Writing 26%, Reading 22%, Listening 28% → normalize thành 100%
-// Dùng overall% của từng task trực tiếp
-const TOTAL_WEIGHT = TASKS.reduce((s,t)=>s+t[3],0); // ~100
+// KPI targets — minimum accuracy % để đóng góp tốt cho score
+const KPI_TARGETS = {
+  "RS": 70, "WFD": 70, "RA": 75, "DI": 65, "RL": 65,
+  "SGD": 65, "RTS": 65, "SWT": 70, "WE": 65,
+  "FIB": 70, "FDD": 65, "ROP": 60, "MRM": 60, "MRS": 60,
+  "SST": 65, "FIL": 70, "HCS": 60, "SMW": 60, "HIW": 65,
+  "WFD": 70, "ASQ": 70, "MLM": 60, "IP": 60,
+};
 
-// ══════════════════════════════════════════════════════════
-// LỊCH HỌC 7 NGÀY
-// ══════════════════════════════════════════════════════════
-const WEEK_PLAN = [
-  { day:1, name:"Thứ 2", tasks:["DI","RL","RA","RS","WFD"],   note:"Speaking nặng" },
-  { day:2, name:"Thứ 3", tasks:["ASQ","SGD","RTS","RS","WFD"], note:"Speaking nhóm" },
-  { day:3, name:"Thứ 4", tasks:["SWT","WE","FIB","RS","WFD"], note:"Writing + Reading" },
-  { day:4, name:"Thứ 5", tasks:["MRM","ROP","FDD","FIB","RS","WFD"], note:"Reading" },
-  { day:5, name:"Thứ 6", tasks:["MRS","SST","MLM","RS","WFD"], note:"Listening" },
-  { day:6, name:"Thứ 7", tasks:["FIL","HCS","SMW","RS","WFD"], note:"Listening tiếp" },
-  { day:0, name:"CN",    tasks:["HIW","WFD","IP","RS","RA"],   note:"Ôn task yếu" },
+const DAILY_TASKS = ["RS","WFD"];
+
+// ── ĐÓNG GÓP ĐA-SKILL THẬT (từ bảng PTE Breakdown by Percentage) ──
+// Mỗi task có thể ảnh hưởng >1 skill score, đúng % trong cột skill đó (cột skill tự cộng ~100%).
+// VD: SWT ảnh hưởng Writing 28% VÀ Reading 23%; ASQ chỉ ảnh hưởng Listening (không phải Speaking).
+const SKILL_CONTRIB = {
+  RA:  { speaking:9 },
+  RS:  { speaking:16, listening:17 },
+  DI:  { speaking:31 },
+  RL:  { speaking:13, listening:13 },
+  ASQ: { listening:4 },
+  SGD: { speaking:19, listening:20 },
+  RTS: { speaking:13 },
+  SWT: { writing:28, reading:23 },
+  WE:  { writing:31 },
+  FIB: { reading:25 },
+  MRM: { reading:5 },
+  ROP: { reading:9 },
+  FDD: { reading:20 },
+  MRS: { reading:3 },
+  SST: { writing:18, listening:10 },
+  MLM: { listening:3 },
+  FIL: { listening:8 },
+  HCS: { reading:3, listening:2 },
+  SMW: { listening:1 },
+  HIW: { reading:13, listening:8 },
+  WFD: { writing:23, listening:13 },
+  IP:  { speaking:1, writing:1, reading:1, listening:1 },
+};
+
+// Số câu thực tế trong đề thi (để tham khảo khi luyện, không phải số bài luyện)
+const EXAM_QCOUNT = {
+  RA:"6-7", RS:"10-12", DI:"5-6", RL:"2-3", ASQ:"5-6", SGD:"2-3", RTS:"2-3",
+  SWT:"1-2 (2 bài)", WE:"1-2 (1 bài)",
+  FIB:"5-6", MRM:"2-3", ROP:"2-3", FDD:"4-5", MRS:"2-3",
+  SST:"1-2 (1 bài)", MLM:"2-3", FIL:"2-3", HCS:"2-3", SMW:"1-2", HIW:"2-3", WFD:"3-4",
+  IP:"tùy mock test",
+};
+
+// Phút thực tế / 1 bài luyện, suy từ thời gian từng phần trong bảng breakdown (làm tròn lên cho luyện có review)
+const TASK_MIN_PER_REP = {
+  RA:1.5, RS:1.5, DI:2, RL:2.5, ASQ:1.5, SGD:3, RTS:2,
+  SWT:10, WE:20,
+  FIB:2, MRM:2, ROP:2.5, FDD:2.5, MRS:1.5,
+  SST:10,
+  MLM:1.5, FIL:2, HCS:1.5, SMW:1, HIW:2.5, WFD:3,
+  IP:5,
+};
+
+// Giờ học thực tế theo thứ (em đi học T3,T4,T6 ~4h; các ngày khác ~10h)
+const DOW_HOURS = { 1:10, 2:4, 3:4, 4:10, 5:4, 6:10, 0:10 };
+
+// Phút trung bình / 1 bài (rep) theo skill — dùng để tính số bài hợp lý trong budget thời gian của ngày
+const MIN_PER_REP = { speaking:6, writing:20, reading:10, listening:10, mixed:15 };
+const MAX_REPS_PER_TASK = 15; // trần số bài/task/ngày để tránh dồn hết giờ vào 1 task
+
+// Skill weights từ ảnh breakdown (speaking 36%, writing 14%, reading 25%, listening 28% — ~actual PTE)
+const SKILL_WEIGHTS = { speaking: 36, writing: 14, reading: 25, listening: 28 };
+
+// Base weekly plan (sẽ được adaptive override)
+const BASE_WEEK_PLAN = [
+  { dow:1, name:"Thứ 2", baseTasks:["DI","RL","RA","RS","WFD"],    note:"Speaking nặng" },
+  { dow:2, name:"Thứ 3", baseTasks:["ASQ","SGD","RTS","RS","WFD"], note:"Speaking nhóm" },
+  { dow:3, name:"Thứ 4", baseTasks:["SWT","WE","FIB","RS","WFD"],  note:"Writing + Reading" },
+  { dow:4, name:"Thứ 5", baseTasks:["MRM","ROP","FDD","FIB","RS","WFD"], note:"Reading" },
+  { dow:5, name:"Thứ 6", baseTasks:["MRS","SST","MLM","RS","WFD"], note:"Listening" },
+  { dow:6, name:"Thứ 7", baseTasks:["FIL","HCS","SMW","RS","WFD"], note:"Listening tiếp" },
+  { dow:0, name:"CN",    baseTasks:["HIW","WFD","IP","RS","RA"],    note:"Ôn tổng hợp" },
 ];
 
-const DAILY_TASKS = ["RS","WFD"]; // luôn làm mỗi ngày
-
-// KPI targets cho goal tracker
-const KPI_TARGETS = [
-  { id:"RS",  target:70, label:"Repeat Sentence" },
-  { id:"WFD", target:70, label:"Write From Dictation" },
-  { id:"RA",  target:75, label:"Read Aloud" },
-  { id:"FIB", target:70, label:"FIB Dropdown" },
-  { id:"FIL", target:70, label:"Fill In Blanks" },
-  { id:"DI",  target:65, label:"Describe Image" },
-  { id:"SWT", target:70, label:"Summarize Written" },
+// 30-day focus phases (đếm từ hôm nay đến ngày thi)
+const PHASE_CONFIG = [
+  { weekOffset:0, label:"Foundation",   focus:"Speaking core — DI, RS, WFD",       color:"#38bdf8" },
+  { weekOffset:1, label:"Build",        focus:"Writing + Reading — SWT, WE, FIB",  color:"#a78bfa" },
+  { weekOffset:2, label:"Strengthen",   focus:"Listening + full mock",             color:"#fb923c" },
+  { weekOffset:3, label:"Polish",       focus:"Weak task intensive + timed sets",  color:"#22c55e" },
+  { weekOffset:4, label:"Exam Prep",    focus:"Review + light maintenance only",   color:"#f59e0b" },
 ];
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // STORAGE
-// ══════════════════════════════════════════════════════════
-// DATA.__daily[date][taskId] = ["18/24","20/24",...]
-// DATA.__history = [{date, todayAcc, allAcc, weightedPred}]
-function loadData(){ try{ return JSON.parse(localStorage.getItem("pte_v5")||"{}"); }catch{ return {}; } }
-function saveData(){ localStorage.setItem("pte_v5",JSON.stringify(DATA)); }
+// ════════════════════════════════════════════════════════════
+function loadData(){ try{ return JSON.parse(localStorage.getItem("pte_v6")||"{}"); }catch{ return {}; } }
+function saveData(){ localStorage.setItem("pte_v6",JSON.stringify(DATA)); }
 const DATA = loadData();
 if(!DATA.__history) DATA.__history=[];
 if(!DATA.__daily)   DATA.__daily={};
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // HELPERS
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 function getToday(){
   const d=new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
-const TODAY = getToday();
-const TODAY_DOW = new Date().getDay(); // 0=CN
+const TODAY     = getToday();
+const TODAY_DOW = new Date().getDay();
+const EXAM_DATE = new Date("2026-07-20");
 
+function dateStr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 function fmtDate(s){ const[,m,d]=s.split("-"); return `${d}/${m}`; }
+function daysUntilExam(){ return Math.ceil((EXAM_DATE-new Date())/86400000); }
 
 function parseScore(v){
   const m=(v||"").trim().match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
@@ -324,7 +472,6 @@ function calcEntries(entries){
   return {raw,max,cnt,pct:max>0?(raw/max)*100:0};
 }
 
-// Tính accuracy cho 1 task trên tập ngày đã cho
 function calcTaskAccOverDays(taskId, dayList){
   let raw=0,max=0,cnt=0;
   dayList.forEach(d=>{
@@ -334,39 +481,48 @@ function calcTaskAccOverDays(taskId, dayList){
   return {raw,max,cnt,pct:max>0?(raw/max)*100:0};
 }
 
-// Weighted prediction dựa trên overall% của từng task
+// ── PREDICTION: scale 10–90 (PTE-realistic baseline)
+// Formula: baseline 10 + (weighted_acc_ratio × 80)
+// weighted_acc_ratio = Σ(task_acc/100 × task_weight) / Σ(task_weight của tasks có data)
 function calcWeightedPrediction(dayList){
   let weightedSum=0, weightUsed=0;
-  TASKS.forEach(([id,,,,, weight])=>{
-    const w=TASKS.find(t=>t[0]===id)[3];
+  TASKS.forEach(([id,,,w])=>{
     const c=calcTaskAccOverDays(id,dayList);
     if(c.max>0){
-      // map accuracy → PTE score contribution
-      // Công thức: task contribution = (acc/100) * weight * (90/100)
-      // → tổng max = 90, baseline = 30
       weightedSum += (c.pct/100)*w;
       weightUsed  += w;
     }
   });
   if(weightUsed===0) return 0;
-  // scale: nếu làm đủ tất cả task ở 100% acc → 90 điểm
-  // baseline 30, range 60
-  const ratio = weightedSum / weightUsed; // 0..1
-  return ratio * 90;
+  const ratio = weightedSum / weightUsed;
+  // baseline 10, range 80 → max 90
+  return 10 + ratio * 80;
 }
 
-// Raw accuracy toàn bộ entries trên dayList
+// ── SKILL SCORE: tính score theo từng skill (0–90 scale), dùng ma trận đóng góp đa-skill thật
+// (1 task có thể đóng góp vào nhiều skill khác nhau với % khác nhau, vd SWT → Writing 28% & Reading 23%)
+function calcSkillScore(skill, dayList){
+  let wSum=0, wUsed=0;
+  TASKS.forEach(([id])=>{
+    const contrib = SKILL_CONTRIB[id]?.[skill];
+    if(!contrib) return;
+    const c = calcTaskAccOverDays(id, dayList);
+    if(c.max>0){ wSum += (c.pct/100)*contrib; wUsed += contrib; }
+  });
+  if(wUsed===0) return null;
+  return 10 + (wSum/wUsed)*80;
+}
+
 function calcRawAccOverDays(dayList){
-  let raw=0,max=0;
+  let raw=0,max=0,cnt=0;
   dayList.forEach(d=>{
     Object.values(DATA.__daily[d]||{}).forEach(arr=>{
-      const c=calcEntries(arr); raw+=c.raw; max+=c.max;
+      const c=calcEntries(arr); raw+=c.raw; max+=c.max; cnt+=c.cnt;
     });
   });
-  return {raw,max,pct:max>0?(raw/max)*100:0};
+  return {raw,max,cnt,pct:max>0?(raw/max)*100:0};
 }
 
-// Accuracy 1 ngày
 function calcDayAcc(day){
   let raw=0,max=0;
   Object.values(DATA.__daily[day]||{}).forEach(arr=>{
@@ -376,7 +532,6 @@ function calcDayAcc(day){
 }
 
 function scoreClass(pct){ return pct<=0?"empty":pct>=70?"good":pct>=50?"warn":"bad"; }
-
 function weightClass(w){ return w>=10?"high":w>=4?"mid":"low"; }
 
 function getAllDays(){
@@ -408,22 +563,115 @@ function calcStreak(){
   return s;
 }
 
-// ══════════════════════════════════════════════════════════
+// ── ADAPTIVE LOGIC: classify each task
+// Returns map: taskId → { status, urgency, currentAcc, target, action }
+function getAdaptiveStatus(dayList){
+  const status = {};
+  TASKS.forEach(([id,,,w])=>{
+    const c = calcTaskAccOverDays(id, dayList);
+    const target = KPI_TARGETS[id] || 65;
+    const hasData = c.max > 0;
+    const acc = hasData ? c.pct : null;
+    const gap = hasData ? target - acc : target; // gap to target
+    // urgency score = gap × (weight/15) → higher weight & bigger gap = more urgent
+    const urgency = gap * (w / 15);
+
+    let st;
+    if(!hasData)              st="UNKNOWN";
+    else if(acc >= target+10) st="REST";      // vượt target 10% → giảm tải
+    else if(acc >= target)    st="MAINTAIN";  // đạt target → duy trì
+    else if(acc >= target-15) st="FOCUS";     // gần target → tập trung
+    else                      st="CRITICAL";  // còn xa → urgent
+
+    let action="";
+    if(st==="CRITICAL")  action=`Tăng tần suất +${Math.min(3,Math.ceil(gap/20))} set/ngày`;
+    else if(st==="FOCUS") action="Duy trì ít nhất 1 set/ngày";
+    else if(st==="MAINTAIN") action="1 set mỗi 2 ngày để giữ";
+    else if(st==="REST") action="Giảm còn 1 set cuối tuần";
+    else action="Cần dữ liệu để đánh giá";
+
+    status[id]={ status:st, urgency, acc, target, gap:Math.max(0,gap), weight:w, action, hasData };
+  });
+  return status;
+}
+
+// ── ADAPTIVE WEEK PLAN: inject boost/reduce tags + tính số bài (reps) theo time budget thực tế
+function getAdaptivePlan(adaptStatus){
+  return BASE_WEEK_PLAN.map(day=>{
+    const tasks = [...day.baseTasks];
+
+    // Find critical tasks not in today's base plan → inject
+    const criticals = Object.entries(adaptStatus)
+      .filter(([id,s])=> s.status==="CRITICAL" && !tasks.includes(id) && !DAILY_TASKS.includes(id))
+      .sort((a,b)=>b[1].urgency - a[1].urgency)
+      .slice(0,2)
+      .map(([id])=>id);
+
+    const finalTasks = [...new Set([...tasks, ...criticals])];
+
+    // ── Phân bổ số bài (reps) theo budget thời gian thật của ngày (DOW_HOURS)
+    const budgetMin = (DOW_HOURS[day.dow]||4) * 60;
+    const reduced = finalTasks.filter(id=>adaptStatus[id]?.status==="REST");
+    const active  = finalTasks.filter(id=>!reduced.includes(id));
+
+    // reps khởi điểm: 1 bài/task active, 0 bài/task REST trong tuần (chỉ làm cuối tuần riêng)
+    const reps = {}; finalTasks.forEach(id=>reps[id]=0);
+    reduced.forEach(id=>reps[id]=0); // REST: không lên lịch trong tuần, chỉ "1 set cuối tuần" như action gợi ý
+    active.forEach(id=>reps[id]=1);
+
+    const minPer = id => TASK_MIN_PER_REP[id] || MIN_PER_REP[TASKS.find(t=>t[0]===id)?.[4]] || 10;
+    let used = active.reduce((s,id)=>s+minPer(id),0);
+
+    // Vòng lặp thêm bài: ưu tiên task urgent nhất nhưng priority giảm dần theo số bài đã có (urgency/reps)
+    // → phân bổ rải đều theo độ ưu tiên thay vì dồn hết vào 1 task
+    let guard=0;
+    while(used < budgetMin && guard<500){
+      guard++;
+      const candidates = active.filter(id=>reps[id]<MAX_REPS_PER_TASK);
+      if(candidates.length===0) break;
+      candidates.sort((a,b)=>{
+        const ua=(adaptStatus[a]?.urgency||1)/reps[a];
+        const ub=(adaptStatus[b]?.urgency||1)/reps[b];
+        return ub-ua;
+      });
+      const pick = candidates[0];
+      if(used + minPer(pick) > budgetMin) break;
+      reps[pick]++; used += minPer(pick);
+    }
+
+    return {
+      ...day,
+      tasks: finalTasks,
+      budgetMin, usedMin: used,
+      taskMeta: finalTasks.map(id=>({
+        id,
+        isDaily: DAILY_TASKS.includes(id),
+        isBoosted: criticals.includes(id),
+        isReduced: adaptStatus[id]?.status==="REST",
+        status: adaptStatus[id]?.status||"UNKNOWN",
+        reps: reps[id],
+      }))
+    };
+  });
+}
+
+// ════════════════════════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 let currentRange = "today";
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════════════════
-document.getElementById("todayLabel").textContent = fmtDate(TODAY);
-document.getElementById("daysLeft").textContent   = Math.ceil((new Date("2026-07-20")-new Date())/86400000);
+// ════════════════════════════════════════════════════════════
+document.getElementById("todayLabel").textContent   = fmtDate(TODAY);
+document.getElementById("daysLeft").textContent     = daysUntilExam();
+document.getElementById("daysLeftInline").textContent = daysUntilExam();
 if(!DATA.__daily[TODAY]) DATA.__daily[TODAY]={};
 saveData();
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // FILTER BAR
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 document.querySelectorAll(".filter-btn").forEach(btn=>{
   btn.addEventListener("click",()=>{
     document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
@@ -433,47 +681,71 @@ document.querySelectorAll(".filter-btn").forEach(btn=>{
   });
 });
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // DASHBOARD
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 function updateDashboard(){
-  const rangeLabel={"today":"Hôm nay","7days":"7 ngày qua","all":"Tất cả"};
-  document.getElementById("rangeLabel").textContent=rangeLabel[currentRange];
+  const rangeLabels={"today":"Hôm nay","7days":"7 ngày qua","all":"Tất cả"};
+  document.getElementById("rangeLabel").textContent=rangeLabels[currentRange];
+  document.getElementById("priorityRangeLabel").textContent=rangeLabels[currentRange];
 
-  const days=getDaysInRange(currentRange);
-  const rawAcc=calcRawAccOverDays(days);
-  const wPred=calcWeightedPrediction(days);
-  const streak=calcStreak();
+  const days   = getDaysInRange(currentRange);
+  const rawAcc = calcRawAccOverDays(days);
+  const wPred  = calcWeightedPrediction(days);
+  const streak = calcStreak();
 
-  // color
-  const predClass=wPred>=55?"good":wPred>=45?"warn":"bad";
-  document.getElementById("overallPrediction").textContent=wPred.toFixed(1);
-  document.getElementById("overallPrediction").className=`value ${predClass}`;
-  document.getElementById("weightedScore").textContent=rawAcc.max>0?rawAcc.pct.toFixed(1)+"%":"—";
-  document.getElementById("weightedScore").className=`value ${scoreClass(rawAcc.pct)}`;
-  document.getElementById("overallAccuracy").textContent=rawAcc.max>0?rawAcc.pct.toFixed(1)+"%":"—";
-  document.getElementById("overallAccuracy").className=`value ${scoreClass(rawAcc.pct)}`;
-  document.getElementById("streakCount").textContent=`${streak} 🔥`;
+  // Overall prediction
+  const predClass = wPred>=55?"good":wPred>=40?"warn":"bad";
+  document.getElementById("overallPrediction").textContent = wPred>0?wPred.toFixed(1):"—";
+  document.getElementById("overallPrediction").className   = `value ${predClass}`;
 
-  // prediction bar
-  const barPct=Math.min(100,(wPred/90)*100);
-  const barColor=wPred>=55?"var(--green)":wPred>=45?"var(--yellow)":"var(--red)";
-  document.getElementById("predBar").style.width=barPct+"%";
-  document.getElementById("predBar").style.background=barColor;
+  // prediction bar: scale 10–90 → 0–100%
+  const barPct   = wPred>0 ? Math.min(100,((wPred-10)/80)*100) : 0;
+  const barColor = wPred>=55?"var(--green)":wPred>=40?"var(--yellow)":"var(--red)";
+  document.getElementById("predBar").style.width      = barPct+"%";
+  document.getElementById("predBar").style.background = barColor;
 
-  // save snapshot (always based on "all")
-  const allDays=getAllDays();
-  const allAcc=calcRawAccOverDays(allDays);
-  const allPred=calcWeightedPrediction(allDays);
-  const todayAcc=calcDayAcc(TODAY);
-  const snap=DATA.__history.find(x=>x.date===TODAY);
-  const entry={date:TODAY,todayAcc:todayAcc.pct,allAcc:allAcc.pct,weightedPred:allPred};
+  // Raw acc
+  document.getElementById("overallAccuracy").textContent = rawAcc.max>0?rawAcc.pct.toFixed(1)+"%":"—";
+  document.getElementById("overallAccuracy").className   = `value ${scoreClass(rawAcc.pct)}`;
+
+  // Streak
+  document.getElementById("streakCount").textContent = `${streak} 🔥`;
+
+  // Skill scores
+  ["speaking","writing","reading","listening"].forEach(sk=>{
+    const sc = calcSkillScore(sk, days);
+    const el = document.getElementById(`skill${sk.charAt(0).toUpperCase()+sk.slice(1)}`);
+    if(el){
+      el.textContent = sc!==null ? sc.toFixed(1) : "—";
+      el.className   = `value ${sc!==null?(sc>=55?"good":sc>=40?"warn":"bad"):""}`;
+    }
+  });
+
+  // Save snapshot
+  const allDays  = getAllDays();
+  const allAcc   = calcRawAccOverDays(allDays);
+  const allPred  = calcWeightedPrediction(allDays);
+  const todayAcc = calcDayAcc(TODAY);
+  const snap     = DATA.__history.find(x=>x.date===TODAY);
+  const entry    = {
+    date:TODAY, todayAcc:todayAcc.pct, allAcc:allAcc.pct, weightedPred:allPred,
+    skillSpeaking: calcSkillScore("speaking",allDays)||0,
+    skillWriting:  calcSkillScore("writing",allDays)||0,
+    skillReading:  calcSkillScore("reading",allDays)||0,
+    skillListening:calcSkillScore("listening",allDays)||0,
+  };
   if(snap) Object.assign(snap,entry); else DATA.__history.push(entry);
   DATA.__history.sort((a,b)=>a.date.localeCompare(b.date));
   saveData();
 
-  renderGoalTracker(days);
-  renderStudyPlan();
+  const adaptStatus = getAdaptiveStatus(days);
+
+  renderPriorityDashboard(adaptStatus);
+  renderGoalTracker(days, wPred, rawAcc);
+  renderSkillBars(days);
+  renderAdaptiveStudyPlan(adaptStatus);
+  renderRoadmap();
   renderCharts();
   renderHistoryTable();
   renderWeeklyReport();
@@ -481,19 +753,63 @@ function updateDashboard(){
   updateAllTaskTotals();
 }
 
-// ══════════════════════════════════════════════════════════
-// GOAL TRACKER
-// ══════════════════════════════════════════════════════════
-function renderGoalTracker(days){
-  const kpi=document.getElementById("todayKPI");
-  const wPred=calcWeightedPrediction(days);
-  const rawAcc=calcRawAccOverDays(days);
+// ════════════════════════════════════════════════════════════
+// PRIORITY DASHBOARD
+// ════════════════════════════════════════════════════════════
+function renderPriorityDashboard(adaptStatus){
+  const el = document.getElementById("priorityGrid");
+  const sorted = Object.entries(adaptStatus)
+    .filter(([,s])=> s.hasData || s.status==="CRITICAL")
+    .sort((a,b)=>{
+      const order={CRITICAL:0,FOCUS:1,MAINTAIN:2,REST:3,UNKNOWN:4};
+      return (order[a[1].status]-order[b[1].status]) || (b[1].urgency-a[1].urgency);
+    });
 
-  let html=`
+  // Show top 12
+  const top = sorted.slice(0,12);
+  el.innerHTML = top.map(([id,s])=>{
+    const task = TASKS.find(t=>t[0]===id);
+    const realCardClass = s.status==="CRITICAL"?"":
+                          s.status==="FOCUS"?"p-warn":
+                          s.status==="MAINTAIN"?"p-good":"p-ok";
+    const barColor = s.status==="CRITICAL"?"var(--red)":
+                     s.status==="FOCUS"?"var(--yellow)":
+                     s.status==="MAINTAIN"?"var(--green)":"#334155";
+    const accDisplay = s.hasData ? s.acc.toFixed(1)+"%" : "—";
+    const barW = s.hasData ? Math.min(100,(s.acc/100)*100) : 0;
+    const targetW = Math.min(100, s.target);
+    return `
+      <div class="priority-card ${realCardClass}">
+        <div class="priority-card-header">
+          <div class="priority-task-name">${task[1]}</div>
+          <span class="priority-badge ${s.status}">${s.status}</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${task[2]} · ${task[3]}% overall</div>
+        <div style="position:relative">
+          <div class="priority-bar-bg">
+            <div class="priority-bar-fill" style="width:${barW}%;background:${barColor}"></div>
+          </div>
+          <div style="position:absolute;top:-1px;left:${targetW}%;width:2px;height:8px;background:#64748b;border-radius:1px"></div>
+        </div>
+        <div class="priority-meta">
+          <span>Hiện tại: <strong>${accDisplay}</strong></span>
+          <span>Target: ${s.target}%</span>
+        </div>
+        <div class="priority-action">💡 ${s.action}</div>
+      </div>`;
+  }).join("");
+}
+
+// ════════════════════════════════════════════════════════════
+// GOAL TRACKER
+// ════════════════════════════════════════════════════════════
+function renderGoalTracker(days, wPred, rawAcc){
+  const kpi = document.getElementById("todayKPI");
+  let html = `
     <div class="kpi-card">
-      <div class="kpi-title">Weighted Prediction</div>
-      <div class="kpi-score ${wPred>=55?"good":wPred>=45?"warn":"bad"}">${wPred.toFixed(1)}</div>
-      <div class="kpi-sub">Target 55 · Thiếu ${Math.max(0,55-wPred).toFixed(1)} điểm</div>
+      <div class="kpi-title">PTE Prediction (10–90)</div>
+      <div class="kpi-score ${wPred>=55?"good":wPred>=40?"warn":"bad"}">${wPred>0?wPred.toFixed(1):"—"}</div>
+      <div class="kpi-sub">Target 55 · Thiếu ${wPred>0?Math.max(0,55-wPred).toFixed(1):"??"} điểm</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-title">Raw Accuracy</div>
@@ -501,68 +817,166 @@ function renderGoalTracker(days){
       <div class="kpi-sub">${rawAcc.cnt||0} bài đã nhập</div>
     </div>`;
 
-  KPI_TARGETS.forEach(g=>{
-    const c=calcTaskAccOverDays(g.id,days);
-    const rem=Math.max(0,g.target-c.pct);
-    const task=TASKS.find(t=>t[0]===g.id);
+  Object.entries(KPI_TARGETS).slice(0,9).forEach(([id,target])=>{
+    const task = TASKS.find(t=>t[0]===id); if(!task) return;
+    const c    = calcTaskAccOverDays(id,days);
+    const rem  = Math.max(0,target-c.pct);
     html+=`
       <div class="kpi-card">
-        <div class="kpi-title">${g.label} <span style="color:#475569">(${task[3]}%)</span></div>
+        <div class="kpi-title">${task[1]} <span style="color:#475569">(${task[3]}%)</span></div>
         <div class="kpi-score ${c.max>0?scoreClass(c.pct):"na"}">${c.max>0?c.pct.toFixed(1)+"%":"—"}</div>
-        <div class="kpi-sub">Target ${g.target}% · ${c.cnt} bài · Thiếu ${rem.toFixed(1)}%</div>
+        <div class="kpi-sub">Target ${target}% · ${c.cnt} bài · Gap ${rem.toFixed(1)}%</div>
       </div>`;
   });
   kpi.innerHTML=html;
 }
 
-// ══════════════════════════════════════════════════════════
-// STUDY PLAN — hiển thị cả 7 ngày, highlight hôm nay
-// ══════════════════════════════════════════════════════════
-function renderStudyPlan(){
-  const box=document.getElementById("studyPlan");
-  box.innerHTML=WEEK_PLAN.map(p=>{
-    const isToday=p.day===TODAY_DOW;
-    const taskNames=p.tasks.map(id=>{
-      const t=TASKS.find(x=>x[0]===id);
-      const isDaily=DAILY_TASKS.includes(id);
-      return `<div class="${isDaily?"daily-tag":""}">• ${t[1]}${isDaily?" ⭐":""}</div>`;
+// ════════════════════════════════════════════════════════════
+// SKILL BARS
+// ════════════════════════════════════════════════════════════
+function renderSkillBars(days){
+  const el = document.getElementById("skillBarsEl");
+  const skills = [
+    {key:"speaking",  label:"Speaking",  color:"#38bdf8", weight:36},
+    {key:"writing",   label:"Writing",   color:"#a78bfa", weight:14},
+    {key:"reading",   label:"Reading",   color:"#22c55e", weight:25},
+    {key:"listening", label:"Listening", color:"#fb923c", weight:28},
+  ];
+  el.innerHTML = skills.map(s=>{
+    const sc = calcSkillScore(s.key, days);
+    const pct = sc!==null ? ((sc-10)/80)*100 : 0;
+    const display = sc!==null ? sc.toFixed(1) : "—";
+    const cls = sc!==null?(sc>=55?"good":sc>=40?"warn":"bad"):"";
+    return `
+      <div class="skill-bar-item">
+        <div class="skill-bar-label">
+          <span class="skill-bar-name">${s.label} (${s.weight}% weight)</span>
+          <span class="skill-bar-val ${cls}">${display}</span>
+        </div>
+        <div class="skill-bar-bg">
+          <div class="skill-bar-fill" style="width:${Math.min(100,pct)}%;background:${s.color}"></div>
+        </div>
+        <div style="font-size:9px;color:#475569;margin-top:3px">
+          <span>10</span>
+          <span style="margin-left:55.6%">▲55</span>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+// ════════════════════════════════════════════════════════════
+// ADAPTIVE STUDY PLAN
+// ════════════════════════════════════════════════════════════
+function renderAdaptiveStudyPlan(adaptStatus){
+  const box  = document.getElementById("studyPlan");
+  const plan = getAdaptivePlan(adaptStatus);
+  box.innerHTML = plan.map(p=>{
+    const isToday = p.dow === TODAY_DOW;
+    const taskItems = p.taskMeta.map(m=>{
+      const task = TASKS.find(t=>t[0]===m.id);
+      const dotColor = m.status==="CRITICAL"?"var(--red)":
+                       m.status==="FOCUS"?"var(--yellow)":
+                       m.status==="MAINTAIN"?"var(--green)":"#334155";
+      let cls=""; let prefix="•";
+      if(m.isDaily)   { cls="daily-tag"; prefix="⭐"; }
+      if(m.isBoosted) { cls="boost-tag"; prefix="🔴"; }
+      if(m.isReduced) { cls="rest-tag"; }
+      const repsTxt = m.isReduced ? "(nghỉ tuần, 1 set CT)" : `×${m.reps} bài`;
+      return `<div class="${cls}"><span class="task-dot" style="background:${dotColor}"></span>${prefix} ${task[1]} <strong>${repsTxt}</strong></div>`;
     }).join("");
+    const hrs = ((p.budgetMin||0)/60).toFixed(1);
+    const usedHrs = ((p.usedMin||0)/60).toFixed(1);
     return `
       <div class="plan-day-card ${isToday?"today-plan":""}">
         <div class="plan-day-title">
           <span>${p.name} ${isToday?"📍":""}</span>
           ${isToday?'<span class="plan-day-badge today">HÔM NAY</span>':""}
         </div>
-        <div style="font-size:10px;color:#475569;margin-bottom:6px">${p.note}</div>
-        <div class="plan-tasks">${taskNames}</div>
+        <div style="font-size:10px;color:#475569;margin-bottom:6px">${p.note} · ⏱ ${usedHrs}/${hrs}h</div>
+        <div class="plan-tasks">${taskItems}</div>
       </div>`;
   }).join("");
 }
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// 30-DAY ROADMAP
+// ════════════════════════════════════════════════════════════
+function renderRoadmap(){
+  const headerEl = document.getElementById("roadmapHeader");
+  const gridEl   = document.getElementById("roadmapGrid");
+
+  const days30 = [];
+  for(let i=0;i<30;i++){
+    const d = new Date(TODAY); d.setDate(d.getDate()+i); days30.push(d);
+  }
+
+  // Headers
+  headerEl.innerHTML = ["CN","T2","T3","T4","T5","T6","T7"].map(d=>`<div class="roadmap-header-cell">${d}</div>`).join("");
+
+  // Fill leading empty cells to align first day to correct column
+  const firstDow = days30[0].getDay(); // 0=Sun
+  const cells = [];
+  for(let i=0;i<firstDow;i++) cells.push(`<div></div>`);
+
+  days30.forEach((d,i)=>{
+    const ds    = dateStr(d);
+    const isT   = ds===TODAY;
+    const isEx  = ds===dateStr(EXAM_DATE);
+    const isPast= ds<TODAY;
+    const dow   = d.getDay();
+    const dayAcc= calcDayAcc(ds);
+    const hasData=dayAcc.max>0;
+
+    // Phase
+    const weekNum = Math.floor(i/7);
+    const phase   = PHASE_CONFIG[Math.min(weekNum,PHASE_CONFIG.length-1)];
+
+    // Scheduled tasks for this DOW
+    const schTasks = TASKS.filter(([,,,,,sched])=>sched.includes(dow)).slice(0,3);
+    const taskDots = schTasks.map(([id,,,w,,])=>{
+      const col = w>=10?"var(--red)":w>=4?"var(--yellow)":"#334155";
+      return `<span class="roadmap-cell-dot" style="background:${col}" title="${id}"></span>`;
+    }).join("");
+
+    const accDisplay = hasData ? `${dayAcc.pct.toFixed(0)}%` : "";
+    const accColor   = hasData ? (dayAcc.pct>=70?"var(--green)":dayAcc.pct>=50?"var(--yellow)":"var(--red)") : "";
+
+    cells.push(`
+      <div class="roadmap-cell ${isPast?"past":""} ${isT?"today-cell":""} ${isEx?"exam-cell":""}">
+        <div class="roadmap-cell-date" style="color:${isT?"var(--accent)":isEx?"var(--red)":"var(--muted)"}">${d.getDate()}/${d.getMonth()+1}${isEx?" 🎯":""}</div>
+        <div class="roadmap-cell-focus" style="color:${phase.color};font-size:8px">${isEx?"EXAM DAY":phase.label}</div>
+        ${hasData?`<div style="font-size:11px;font-weight:bold;color:${accColor}">${accDisplay}</div>`:""}
+        <div class="roadmap-cell-tasks">${taskDots}</div>
+      </div>`);
+  });
+
+  gridEl.innerHTML = cells.join("");
+}
+
+// ════════════════════════════════════════════════════════════
 // BUILD TASK CARDS
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 function esc(s){ return s.replace(/[^a-zA-Z0-9]/g,"_"); }
 
 function buildTaskCards(){
-  const container=document.getElementById("taskContainer");
-  container.innerHTML="";
-  const days=getAllDays();
+  const container = document.getElementById("taskContainer");
+  container.innerHTML = "";
+  const days = getAllDays();
 
   TASKS.forEach(([id,en,vi,weight,skill,schedule])=>{
-    const wClass=weightClass(weight);
-    const isScheduledToday=schedule.includes(TODAY_DOW);
-    const schedDays=schedule.map(d=>["CN","T2","T3","T4","T5","T6","T7"][d]).join(", ");
+    const wClass = weightClass(weight);
+    const isToday= schedule.includes(TODAY_DOW);
+    const schedDays = schedule.map(d=>["CN","T2","T3","T4","T5","T6","T7"][d]).join(", ");
 
-    const card=document.createElement("div");
+    const card = document.createElement("div");
     card.className="task-card";
     card.innerHTML=`
       <div class="task-header">
-        <div class="task-name">${en} ${isScheduledToday?"🔔":""}</div>
+        <div class="task-name">${en} ${isToday?"🔔":""}<span class="adapt-badge" id="adapbadge_${esc(id)}"></span></div>
         <span class="task-weight ${wClass}">${weight}% overall</span>
       </div>
       <div class="task-vi">${vi}</div>
-      <div class="task-schedule">📅 ${schedDays}${DAILY_TASKS.includes(id)?" · <span style='color:var(--green)'>⭐ Daily</span>":""}</div>
+      <div class="task-schedule">📅 ${schedDays}${DAILY_TASKS.includes(id)?" · <span style='color:var(--green)'>⭐ Daily</span>":""} · 🎯 Đề thi: ${EXAM_QCOUNT[id]||"—"} câu</div>
       <div class="day-blocks" id="blocks_${esc(id)}"></div>
       <div class="task-total">
         <span class="tot-label">Tổng (<span class="range-label-small">hôm nay</span>)</span>
@@ -570,24 +984,23 @@ function buildTaskCards(){
       </div>`;
     container.appendChild(card);
 
-    const blocksEl=document.getElementById(`blocks_${esc(id)}`);
+    const blocksEl = document.getElementById(`blocks_${esc(id)}`);
     days.forEach(day=>{ blocksEl.appendChild(buildDayBlock(id,day)); });
     updateTaskTotal(id);
   });
 }
 
 function buildDayBlock(taskId, day){
-  const isToday=day===TODAY;
+  const isToday = day===TODAY;
   if(!DATA.__daily[day]) DATA.__daily[day]={};
   if(!Array.isArray(DATA.__daily[day][taskId])) DATA.__daily[day][taskId]=[];
-  const entries=DATA.__daily[day][taskId];
+  const entries = DATA.__daily[day][taskId];
 
-  const block=document.createElement("div");
+  const block = document.createElement("div");
   block.className=`day-block ${isToday?"today":""}${!isToday?" collapsed":""}`;
   block.id=`block_${esc(taskId)}_${day}`;
 
-  // Header — click to expand/collapse past days
-  const header=document.createElement("div");
+  const header = document.createElement("div");
   header.className="day-block-header";
   header.innerHTML=`
     <div class="day-block-label">
@@ -608,16 +1021,15 @@ function buildDayBlock(taskId, day){
     });
   }
 
-  // Entries wrap
-  const wrap=document.createElement("div");
+  const wrap = document.createElement("div");
   wrap.className="day-entries-wrap";
 
-  const list=document.createElement("div");
+  const list = document.createElement("div");
   list.className="entries-list";
   list.id=`list_${esc(taskId)}_${day}`;
   wrap.appendChild(list);
 
-  const startEntries=entries.length>0?entries:[""];
+  const startEntries = entries.length>0?entries:[""];
   startEntries.forEach((val,idx)=>{ list.appendChild(buildEntryRow(taskId,day,idx,val,isToday)); });
 
   if(isToday){
@@ -652,20 +1064,18 @@ function addNewEntry(taskId,day,list){
 function buildEntryRow(taskId,day,idx,val,isToday){
   const row=document.createElement("div");
   row.className="entry-row";
-
   const score=parseScore(val);
   const pct=score&&score.max>0?(score.raw/score.max)*100:0;
   const cls=score?scoreClass(pct):"empty";
 
   if(isToday){
     row.innerHTML=`
-      <input class="entry-input" type="text" value="${val}" placeholder="vd: 18/24"
+      <input class="entry-input" type="text" value="${val}" placeholder="vd: 9.8/13 hoặc 18/24"
         data-task="${taskId}" data-date="${day}" data-idx="${idx}">
       <div class="entry-pct ${cls}" id="epct_${esc(taskId)}_${day}_${idx}">${score&&score.max>0?pct.toFixed(0)+"%":"—"}</div>
       <button class="remove-btn">✕</button>`;
 
     const input=row.querySelector(".entry-input");
-
     input.addEventListener("input",()=>{
       const v=input.value.trim();
       ensureArr(day,taskId,idx);
@@ -681,7 +1091,6 @@ function buildEntryRow(taskId,day,idx,val,isToday){
       updateTaskTotal(taskId);
       updateDashboard();
     });
-
     input.addEventListener("keydown",e=>{
       if(e.key==="Enter"){
         e.preventDefault();
@@ -689,7 +1098,6 @@ function buildEntryRow(taskId,day,idx,val,isToday){
         addNewEntry(taskId,day,list);
       }
     });
-
     row.querySelector(".remove-btn").addEventListener("click",()=>{
       if(!DATA.__daily[day]||!DATA.__daily[day][taskId]) return;
       DATA.__daily[day][taskId].splice(idx,1);
@@ -747,14 +1155,20 @@ function updateTaskTotal(taskId){
   if(el){
     el.className=`tot-val ${scoreClass(tp)}`;
     el.textContent=tm>0?`${cnt} bài · ${tr}/${tm} · TB ${tp.toFixed(1)}%`:"—";
+    const card=el.closest(".task-card");
+    if(card){
+      const rl=card.querySelector(".range-label-small");
+      if(rl) rl.textContent={"today":"hôm nay","7days":"7 ngày","all":"tất cả"}[currentRange];
+    }
   }
-  // update range label inside task card
-  const labels=document.querySelectorAll(`#tot_${esc(taskId)}`);
-  // also update small range label
-  const card=el?.closest(".task-card");
-  if(card){
-    const rl=card.querySelector(".range-label-small");
-    if(rl) rl.textContent={"today":"hôm nay","7days":"7 ngày","all":"tất cả"}[currentRange];
+
+  // Update adapt badge on task card
+  const badge=document.getElementById(`adapbadge_${esc(taskId)}`);
+  if(badge){
+    const adapt=getAdaptiveStatus(getDaysInRange(currentRange))[taskId];
+    if(adapt&&adapt.status==="CRITICAL"){ badge.textContent="⚠ CRITICAL"; badge.className="adapt-badge boost"; }
+    else if(adapt&&adapt.status==="REST"){ badge.textContent="✓ REST"; badge.className="adapt-badge reduce"; }
+    else{ badge.textContent=""; badge.className="adapt-badge"; }
   }
 }
 
@@ -762,16 +1176,19 @@ function updateAllTaskTotals(){
   TASKS.forEach(([id])=>updateTaskTotal(id));
 }
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // CHARTS
-// ══════════════════════════════════════════════════════════
-let accChart=null,predChart=null;
+// ════════════════════════════════════════════════════════════
+let accChart=null,predChart=null,radarChart=null;
 function renderCharts(){
   const hist=DATA.__history; if(!hist||!hist.length) return;
   const labels=hist.map(x=>fmtDate(x.date));
   const todayData=hist.map(x=>+((x.todayAcc||0).toFixed(1)));
-  const allData=hist.map(x=>+((x.allAcc||0).toFixed(1)));
-  const predData=hist.map(x=>+((x.weightedPred||30).toFixed(1)));
+  const predData=hist.map(x=>+((x.weightedPred||0).toFixed(1)));
+  const spData=hist.map(x=>+((x.skillSpeaking||0).toFixed(1)));
+  const wrData=hist.map(x=>+((x.skillWriting||0).toFixed(1)));
+  const rdData=hist.map(x=>+((x.skillReading||0).toFixed(1)));
+  const liData=hist.map(x=>+((x.skillListening||0).toFixed(1)));
   const grid="#1e293b",tick="#64748b";
   const baseOpts={responsive:true,plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{x:{ticks:{color:tick},grid:{color:grid}},y:{ticks:{color:tick},grid:{color:grid}}}};
 
@@ -779,20 +1196,39 @@ function renderCharts(){
   if(accChart) accChart.destroy();
   accChart=new Chart(c1,{type:"line",data:{labels,datasets:[
     {label:"Acc hôm đó %",data:todayData,tension:.3,borderColor:"#38bdf8",backgroundColor:"rgba(56,189,248,.08)",fill:true,pointRadius:3},
-    {label:"Acc tích lũy %",data:allData,tension:.3,borderColor:"#22c55e",backgroundColor:"transparent",borderDash:[4,4],pointRadius:2}
   ]},options:baseOpts});
 
   const c2=document.getElementById("predictionChart").getContext("2d");
   if(predChart) predChart.destroy();
   predChart=new Chart(c2,{type:"line",data:{labels,datasets:[
-    {label:"Weighted Prediction",data:predData,tension:.3,borderColor:"#a78bfa",backgroundColor:"rgba(167,139,250,.08)",fill:true,pointRadius:3},
-    {label:"Mục tiêu 55",data:Array(labels.length).fill(55),borderColor:"#ef4444",borderDash:[6,3],pointRadius:0}
+    {label:"PTE Prediction",data:predData,tension:.3,borderColor:"#a78bfa",backgroundColor:"rgba(167,139,250,.08)",fill:true,pointRadius:3},
+    {label:"Target 55",data:Array(labels.length).fill(55),borderColor:"#ef4444",borderDash:[6,3],pointRadius:0},
+    {label:"Speaking",data:spData,tension:.3,borderColor:"#38bdf8",borderDash:[2,2],pointRadius:0},
+    {label:"Writing",data:wrData,tension:.3,borderColor:"#a78bfa",borderDash:[2,2],pointRadius:0},
+    {label:"Reading",data:rdData,tension:.3,borderColor:"#22c55e",borderDash:[2,2],pointRadius:0},
+    {label:"Listening",data:liData,tension:.3,borderColor:"#fb923c",borderDash:[2,2],pointRadius:0},
   ]},options:baseOpts});
+
+  // Radar chart (latest data)
+  const allDays=getAllDays();
+  const sp=calcSkillScore("speaking",allDays)||0;
+  const wr=calcSkillScore("writing",allDays)||0;
+  const rd=calcSkillScore("reading",allDays)||0;
+  const li=calcSkillScore("listening",allDays)||0;
+  const c3=document.getElementById("skillRadarChart").getContext("2d");
+  if(radarChart) radarChart.destroy();
+  radarChart=new Chart(c3,{type:"radar",data:{
+    labels:["Speaking","Writing","Reading","Listening"],
+    datasets:[
+      {label:"Hiện tại",data:[sp,wr,rd,li],borderColor:"#38bdf8",backgroundColor:"rgba(56,189,248,.15)",pointRadius:3},
+      {label:"Target (55)",data:[55,55,55,55],borderColor:"#ef4444",backgroundColor:"transparent",borderDash:[4,4],pointRadius:0}
+    ]
+  },options:{responsive:true,scales:{r:{min:0,max:90,ticks:{color:tick,stepSize:15},grid:{color:grid},pointLabels:{color:"#94a3b8"}}},plugins:{legend:{labels:{color:"#94a3b8",boxWidth:12}}}}});
 }
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // HISTORY TABLE
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 function renderHistoryTable(){
   const tbody=document.getElementById("historyTableBody");
   const hist=[...(DATA.__history||[])].reverse();
@@ -804,23 +1240,23 @@ function renderHistoryTable(){
     return `<tr class="${isT?"today-row":""}">
       <td>${h.date}${isT?" 📍":""}</td>
       <td>${(h.todayAcc||0).toFixed(1)}%</td>
-      <td>${(h.weightedPred||30).toFixed(1)}</td>
+      <td>${(h.weightedPred||0)>0?(h.weightedPred).toFixed(1):"—"}</td>
       <td>${(h.allAcc||0).toFixed(1)}%</td>
       <td>${total} bài</td>
     </tr>`;
   }).join("");
 }
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // WEEKLY REPORT
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 function renderWeeklyReport(){
   const box=document.getElementById("weeklyReport");
   const hist=DATA.__history;
   if(!hist||hist.length<2){ box.innerHTML='<p style="color:var(--muted);font-size:13px">Cần ít nhất 2 ngày dữ liệu.</p>'; return; }
   const week=hist.slice(-7);
   const first=week[0],last=week[week.length-1];
-  const predChange=(last.weightedPred||30)-(first.weightedPred||30);
+  const predChange=(last.weightedPred||0)-(first.weightedPred||0);
   const accChange=(last.allAcc||0)-(first.allAcc||0);
   const avgAcc=week.reduce((s,x)=>s+(x.todayAcc||0),0)/week.length;
   const activeDays=week.filter(x=>(x.todayAcc||0)>0).length;
@@ -829,20 +1265,20 @@ function renderWeeklyReport(){
   const chgClass=v=>v>0?"up":v<0?"down":"flat";
   const sign=v=>v>0?"+":"";
   box.innerHTML=`
-    <p style="color:var(--muted);font-size:12px;margin-bottom:10px">7 ngày gần nhất: ${fmtDate(first.date)} → ${fmtDate(last.date)}</p>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:10px">7 ngày: ${fmtDate(first.date)} → ${fmtDate(last.date)}</p>
     <div class="report-grid">
       <div class="report-card"><div class="report-title">Prediction thay đổi</div><div class="report-val ${chgClass(predChange)}">${sign(predChange)}${predChange.toFixed(1)} điểm</div></div>
       <div class="report-card"><div class="report-title">Acc tích lũy thay đổi</div><div class="report-val ${chgClass(accChange)}">${sign(accChange)}${accChange.toFixed(1)}%</div></div>
       <div class="report-card"><div class="report-title">Avg acc / ngày</div><div class="report-val ${scoreClass(avgAcc)}">${avgAcc.toFixed(1)}%</div></div>
       <div class="report-card"><div class="report-title">Ngày luyện tập</div><div class="report-val">${activeDays}/${week.length} ngày</div></div>
       <div class="report-card"><div class="report-title">Tổng bài nhập</div><div class="report-val">${totalEntries} bài</div></div>
-      <div class="report-card"><div class="report-title">Cần tăng thêm</div><div class="report-val ${chgClass(0)}">${Math.max(0,55-(last.weightedPred||30)).toFixed(1)} điểm</div></div>
+      <div class="report-card"><div class="report-title">Cần tăng thêm</div><div class="report-val bad">${Math.max(0,55-(last.weightedPred||0)).toFixed(1)} điểm</div></div>
     </div>`;
 }
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // STREAK
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 function renderStreakPanel(){
   const box=document.getElementById("streakPanel");
   const streak=calcStreak();
@@ -855,13 +1291,13 @@ function renderStreakPanel(){
   }
   box.innerHTML=`
     <p style="font-size:13px;margin-bottom:8px">Streak: <strong style="color:var(--green)">${streak} ngày 🔥</strong></p>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">30 ngày gần nhất — xanh = có luyện tập</p>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">30 ngày gần nhất</p>
     <div class="streak-bar">${dots.join("")}</div>`;
 }
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // TABS
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 document.querySelectorAll(".tab").forEach(tab=>{
   tab.addEventListener("click",()=>{
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -873,9 +1309,9 @@ document.querySelectorAll(".tab").forEach(tab=>{
   });
 });
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // EXPORT / IMPORT / RESET
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 document.getElementById("exportJSON").addEventListener("click",()=>{
   const blob=new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`pte_backup_${TODAY}.json`; a.click();
@@ -910,15 +1346,14 @@ document.getElementById("exportCSV").addEventListener("click",()=>{
 });
 document.getElementById("resetAll").addEventListener("click",()=>{
   if(!confirm("Xóa toàn bộ? Không thể hoàn tác!")) return;
-  localStorage.removeItem("pte_v5"); location.reload();
+  localStorage.removeItem("pte_v6"); location.reload();
 });
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // BOOT
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 buildTaskCards();
 updateDashboard();
 </script>
-
 </body>
 </html>
