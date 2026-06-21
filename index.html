@@ -236,6 +236,7 @@ canvas{ max-height:170px; }
   <div class="card">
     <div class="label">PTE Score Prediction</div>
     <div class="value" id="overallPrediction">—</div>
+    <div style="font-size:9px;color:var(--muted);margin-top:-4px;margin-bottom:4px">Tính trên đủ 22 task × đúng % overall — task chưa luyện = 0đ phần đó, không "ăn gian" bằng cách chia lại weight</div>
     <div class="pred-bar-wrap">
       <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:2px">
         <span>10</span><span>Target 55</span><span>90</span>
@@ -494,35 +495,36 @@ function calcTaskAccOverDays(taskId, dayList){
 }
 
 // ── PREDICTION: scale 10–90 (PTE-realistic baseline)
-// Formula: baseline 10 + (weighted_acc_ratio × 80)
-// weighted_acc_ratio = Σ(task_acc/100 × task_weight) / Σ(task_weight của tasks có data)
+// QUAN TRỌNG: áp ĐÚNG % overall cố định trên thang 90, KHÔNG renormalize theo task đã làm.
+// VD: task weight 1% → dù làm 100% đúng cũng chỉ góp tối đa 1% × 80 = 0.8 điểm vào overall.
+// Task CHƯA làm (max=0) → coi như góp 0 vào tổng, không bị loại khỏi mẫu số (đúng thực tế PTE:
+// điểm overall tính trên cả 22 task, task nào chưa luyện thì phần đó vẫn "tính là 0").
 function calcWeightedPrediction(dayList){
-  let weightedSum=0, weightUsed=0;
+  const totalWeight = TASKS.reduce((s,[,,,w])=>s+w,0); // ≈100
+  let weightedSum=0, anyData=false;
   TASKS.forEach(([id,,,w])=>{
     const c=calcTaskAccOverDays(id,dayList);
-    if(c.max>0){
-      weightedSum += (c.pct/100)*w;
-      weightUsed  += w;
-    }
+    if(c.max>0){ weightedSum += (c.pct/100)*w; anyData=true; } // chưa có data → +0, vẫn nằm trong totalWeight
   });
-  if(weightUsed===0) return 0;
-  const ratio = weightedSum / weightUsed;
-  // baseline 10, range 80 → max 90
-  return 10 + ratio * 80;
+  if(!anyData) return 0; // chưa nhập gì hết → hiển thị "—" thay vì baseline 10
+  const ratio = weightedSum/totalWeight;
+  return 10 + ratio*80;
 }
 
 // ── SKILL SCORE: tính score theo từng skill (0–90 scale), dùng ma trận đóng góp đa-skill thật
 // (1 task có thể đóng góp vào nhiều skill khác nhau với % khác nhau, vd SWT → Writing 28% & Reading 23%)
+// Cũng KHÔNG renormalize: task trong skill đó chưa làm → góp 0, mẫu số vẫn là tổng % cố định của skill (≈100%).
 function calcSkillScore(skill, dayList){
-  let wSum=0, wUsed=0;
+  let wSum=0, totalContrib=0, anyData=false;
   TASKS.forEach(([id])=>{
     const contrib = SKILL_CONTRIB[id]?.[skill];
     if(!contrib) return;
+    totalContrib += contrib;
     const c = calcTaskAccOverDays(id, dayList);
-    if(c.max>0){ wSum += (c.pct/100)*contrib; wUsed += contrib; }
+    if(c.max>0){ wSum += (c.pct/100)*contrib; anyData=true; } // chưa làm → +0
   });
-  if(wUsed===0) return null;
-  return 10 + (wSum/wUsed)*80;
+  if(totalContrib===0 || !anyData) return null;
+  return 10 + (wSum/totalContrib)*80;
 }
 
 function calcRawAccOverDays(dayList){
