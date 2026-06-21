@@ -234,6 +234,12 @@ canvas{ max-height:170px; }
 <div class="dashboard">
   <div class="card"><div class="label">Ngày còn lại</div><div class="value" id="daysLeft">—</div></div>
   <div class="card">
+    <div class="label">⏱ Giờ học (auto)</div>
+    <div class="value" id="studyTimeToday">0h 0p</div>
+    <div style="font-size:9px;color:var(--muted);margin-top:-2px">Hôm nay · Tổng: <span id="studyTimeTotal">0h</span></div>
+    <div style="font-size:8.5px;color:var(--muted);margin-top:2px">Chỉ tính khi đang tương tác — tự ngưng sau 10p không chạm vào trang</div>
+  </div>
+  <div class="card">
     <div class="label">PTE Score Prediction</div>
     <div class="value" id="overallPrediction">—</div>
     <div style="font-size:9px;color:var(--muted);margin-top:-4px;margin-bottom:4px">Tính trên đủ 22 task × đúng % overall — task chưa luyện = 0đ phần đó, không "ăn gian" bằng cách chia lại weight</div>
@@ -348,15 +354,10 @@ const TASKS = [
   ["SWT", "Summarize Written Text",   "Tóm tắt văn bản viết",    7,  "writing",   [3]],
   ["WE",  "Write Essay",              "Viết luận",                7,  "writing",   [3]],
   ["FIB", "FIB – Dropdown",           "Điền từ (dropdown)",       7,  "reading",   [3,4]],
-  ["MRM", "MCQ Reading Multiple",     "Đọc MCQ nhiều đáp án",     1,  "reading",   [4]],
   ["ROP", "Re-order Paragraphs",      "Sắp xếp đoạn văn",        3,  "reading",   [4]],
   ["FDD", "FIB – Drag & Drop",        "Kéo thả điền từ",         6,  "reading",   [4]],
-  ["MRS", "MCQ Reading Single",       "Đọc MCQ một đáp án",       1,  "reading",   [5]],
   ["SST", "Summarize Spoken Text",    "Tóm tắt bài nghe",        4,  "listening", [5]],
-  ["MLM", "MCQ Listening Multiple",   "Nghe MCQ nhiều đáp án",   1,  "listening", [5]],
   ["FIL", "Fill In The Blanks",       "Điền từ bài nghe",        3,  "listening", [6]],
-  ["HCS", "Highlight Correct Summary","Chọn tóm tắt đúng",       1,  "listening", [6]],
-  ["SMW", "Select Missing Word",      "Chọn từ bị thiếu",        1,  "listening", [6]],
   ["HIW", "Highlight Incorrect Words","Tô từ sai",               4,  "listening", [0]],
   ["WFD", "Write From Dictation",     "Nghe và viết lại",        5,  "listening", [1,2,3,4,5,6,0]],
   ["IP",  "Integrated Practice",      "Luyện tích hợp",          1,  "mixed",     [0]],
@@ -366,9 +367,9 @@ const TASKS = [
 const KPI_TARGETS = {
   "RS": 70, "WFD": 70, "RA": 75, "DI": 65, "RL": 65,
   "SGD": 65, "RTS": 65, "SWT": 70, "WE": 65,
-  "FIB": 70, "FDD": 65, "ROP": 60, "MRM": 60, "MRS": 60,
-  "SST": 65, "FIL": 70, "HCS": 60, "SMW": 60, "HIW": 65,
-  "WFD": 70, "ASQ": 70, "MLM": 60, "IP": 60,
+  "FIB": 70, "FDD": 65, "ROP": 60,
+  "SST": 65, "FIL": 70, "HIW": 65,
+  "ASQ": 70, "IP": 60,
 };
 
 const DAILY_TASKS = ["RS","WFD"];
@@ -387,15 +388,10 @@ const SKILL_CONTRIB = {
   SWT: { writing:28, reading:23 },
   WE:  { writing:31 },
   FIB: { reading:25 },
-  MRM: { reading:5 },
   ROP: { reading:9 },
   FDD: { reading:20 },
-  MRS: { reading:3 },
   SST: { writing:18, listening:10 },
-  MLM: { listening:3 },
   FIL: { listening:8 },
-  HCS: { reading:3, listening:2 },
-  SMW: { listening:1 },
   HIW: { reading:13, listening:8 },
   WFD: { writing:23, listening:13 },
   IP:  { speaking:1, writing:1, reading:1, listening:1 },
@@ -405,8 +401,8 @@ const SKILL_CONTRIB = {
 const EXAM_QCOUNT = {
   RA:"6-7", RS:"10-12", DI:"5-6", RL:"2-3", ASQ:"5-6", SGD:"2-3", RTS:"2-3",
   SWT:"1-2 (2 bài)", WE:"1-2 (1 bài)",
-  FIB:"5-6", MRM:"2-3", ROP:"2-3", FDD:"4-5", MRS:"2-3",
-  SST:"1-2 (1 bài)", MLM:"2-3", FIL:"2-3", HCS:"2-3", SMW:"1-2", HIW:"2-3", WFD:"3-4",
+  FIB:"5-6", ROP:"2-3", FDD:"4-5",
+  SST:"1-2 (1 bài)", FIL:"2-3", HIW:"2-3", WFD:"3-4",
   IP:"tùy mock test",
 };
 
@@ -414,9 +410,9 @@ const EXAM_QCOUNT = {
 const TASK_MIN_PER_REP = {
   RA:1.5, RS:1.5, DI:2, RL:2.5, ASQ:1.5, SGD:3, RTS:2,
   SWT:10, WE:20,
-  FIB:2, MRM:2, ROP:2.5, FDD:2.5, MRS:1.5,
+  FIB:2, ROP:2.5, FDD:2.5,
   SST:10,
-  MLM:1.5, FIL:2, HCS:1.5, SMW:1, HIW:2.5, WFD:3,
+  FIL:2, HIW:2.5, WFD:3,
   IP:5,
 };
 
@@ -425,19 +421,29 @@ const DOW_HOURS = { 1:10, 2:4, 3:4, 4:10, 5:4, 6:10, 0:10 };
 
 // Phút trung bình / 1 bài (rep) theo skill — dùng để tính số bài hợp lý trong budget thời gian của ngày
 const MIN_PER_REP = { speaking:6, writing:20, reading:10, listening:10, mixed:15 };
-const MAX_REPS_PER_TASK = 15; // trần số bài/task/ngày để tránh dồn hết giờ vào 1 task
+const MAX_REPS_PER_TASK = 15; // trần chung số bài/task/ngày
+
+// Trần RIÊNG cho task "nặng đầu" — viết essay/tóm tắt cần tập trung cao, làm nhiều lần/ngày
+// sẽ giảm chất lượng (mỏi, lan man) chứ không giúp tăng điểm, nên giữ thấp dù budget còn dư.
+const MAX_REPS_OVERRIDE = {
+  WE: 2,    // Write Essay (20 phút/bài, viết liên tục >2 bài/ngày dễ đuối ý, chất lượng giảm)
+  SWT: 3,   // Summarize Written Text (10 phút/bài)
+  SST: 2,   // Summarize Spoken Text (10 phút/bài, đòi hỏi nghe + viết tập trung cao)
+  DI: 6, RL: 6, SGD: 5, RTS: 6, // speaking dài hơi cũng cap nhẹ tránh khàn giọng/mất tập trung
+};
+function capFor(id){ return MAX_REPS_OVERRIDE[id] ?? MAX_REPS_PER_TASK; }
 
 // Skill weights từ ảnh breakdown (speaking 36%, writing 14%, reading 25%, listening 28% — ~actual PTE)
 const SKILL_WEIGHTS = { speaking: 36, writing: 14, reading: 25, listening: 28 };
 
 // Base weekly plan (sẽ được adaptive override)
 const BASE_WEEK_PLAN = [
-  { dow:1, name:"Thứ 2", baseTasks:["DI","RL","RA","RS","WFD"],    note:"Speaking nặng" },
+  { dow:1, name:"Thứ 2", baseTasks:["DI","RL","RA","ASQ","SGD","RS","WFD"],    note:"Speaking nặng" },
   { dow:2, name:"Thứ 3", baseTasks:["ASQ","SGD","RTS","RS","WFD"], note:"Speaking nhóm" },
   { dow:3, name:"Thứ 4", baseTasks:["SWT","WE","FIB","RS","WFD"],  note:"Writing + Reading" },
-  { dow:4, name:"Thứ 5", baseTasks:["MRM","ROP","FDD","FIB","RS","WFD"], note:"Reading" },
-  { dow:5, name:"Thứ 6", baseTasks:["MRS","SST","MLM","RS","WFD"], note:"Listening" },
-  { dow:6, name:"Thứ 7", baseTasks:["FIL","HCS","SMW","RS","WFD"], note:"Listening tiếp" },
+  { dow:4, name:"Thứ 5", baseTasks:["ROP","FDD","FIB","RS","WFD"], note:"Reading" },
+  { dow:5, name:"Thứ 6", baseTasks:["SST","FIL","RS","WFD"],       note:"Listening" },
+  { dow:6, name:"Thứ 7", baseTasks:["FIL","HIW","FDD","ROP","RS","WFD"], note:"Listening tiếp + ôn Reading" },
   { dow:0, name:"CN",    baseTasks:["HIW","WFD","IP","RS","RA"],    note:"Ôn tổng hợp" },
 ];
 
@@ -458,6 +464,7 @@ function saveData(){ localStorage.setItem("pte_v6",JSON.stringify(DATA)); }
 const DATA = loadData();
 if(!DATA.__history) DATA.__history=[];
 if(!DATA.__daily)   DATA.__daily={};
+if(!DATA.__studyTime) DATA.__studyTime={ total:0, byDate:{} }; // giây
 
 // ════════════════════════════════════════════════════════════
 // HELPERS
@@ -641,7 +648,7 @@ function getAdaptivePlan(adaptStatus){
     let guard=0;
     while(used < budgetMin && guard<500){
       guard++;
-      const candidates = active.filter(id=>reps[id]<MAX_REPS_PER_TASK);
+      const candidates = active.filter(id=>reps[id]<capFor(id));
       if(candidates.length===0) break;
       candidates.sort((a,b)=>{
         const ua=(adaptStatus[a]?.urgency||1)/reps[a];
@@ -653,10 +660,15 @@ function getAdaptivePlan(adaptStatus){
       reps[pick]++; used += minPer(pick);
     }
 
+    const leftoverMin = Math.max(0, budgetMin - used);
+    const leftoverNote = (leftoverMin >= 90)
+      ? `Đã chạm trần chống nhồi (mỗi task có giới hạn bài/ngày) — còn dư ~${(leftoverMin/60).toFixed(1)}h. Nên dùng để: làm 1 đề mock test đầy đủ, hoặc ôn lại lỗi sai hôm trước, KHÔNG nên ép thêm reps cùng 1 task.`
+      : null;
+
     return {
       ...day,
       tasks: finalTasks,
-      budgetMin, usedMin: used,
+      budgetMin, usedMin: used, leftoverMin, leftoverNote,
       taskMeta: finalTasks.map(id=>({
         id,
         isDaily: DAILY_TASKS.includes(id),
@@ -908,6 +920,7 @@ function renderAdaptiveStudyPlan(adaptStatus){
           ${isToday?'<span class="plan-day-badge today">HÔM NAY</span>':""}
         </div>
         <div style="font-size:10px;color:#475569;margin-bottom:6px">${p.note} · ⏱ ${usedHrs}/${hrs}h</div>
+        ${p.leftoverNote?`<div style="font-size:9.5px;color:var(--yellow);background:#f59e0b14;border-radius:6px;padding:4px 6px;margin-bottom:6px">⚠ ${p.leftoverNote}</div>`:""}
         <div class="plan-tasks">${taskItems}</div>
       </div>`;
   }).join("");
@@ -1376,8 +1389,52 @@ document.getElementById("resetAll").addEventListener("click",()=>{
 });
 
 // ════════════════════════════════════════════════════════════
-// BOOT
+// STUDY TIME TRACKER — chỉ tính giờ khi đang tương tác với trang,
+// tự ngưng (pause) nếu không có tương tác nào trong 10 phút.
 // ════════════════════════════════════════════════════════════
+const IDLE_LIMIT_MS = 10*60*1000; // 10 phút
+let lastActivity = Date.now();
+let studyTickHandle = null;
+
+function fmtHM(sec){
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  return h>0 ? `${h}h ${m}p` : `${m}p`;
+}
+
+function renderStudyTime(){
+  const todayEl = document.getElementById("studyTimeToday");
+  const totalEl = document.getElementById("studyTimeTotal");
+  if(todayEl) todayEl.textContent = fmtHM(DATA.__studyTime.byDate[TODAY]||0);
+  const totalSec = Object.values(DATA.__studyTime.byDate||{}).reduce((s,v)=>s+v,0);
+  if(totalEl) totalEl.textContent = fmtHM(totalSec);
+}
+
+function studyTick(){
+  const idle = Date.now() - lastActivity;
+  if(idle <= IDLE_LIMIT_MS && document.visibilityState === "visible"){
+    DATA.__studyTime.byDate[TODAY] = (DATA.__studyTime.byDate[TODAY]||0) + 1;
+    DATA.__studyTime.total = (DATA.__studyTime.total||0) + 1;
+    renderStudyTime();
+  }
+}
+
+function markActivity(){ lastActivity = Date.now(); }
+
+// Các sự kiện coi là "đang tương tác" — gõ số, click, đổi input...
+["click","input","change","keydown","touchstart"].forEach(evt=>{
+  document.addEventListener(evt, markActivity, {passive:true});
+});
+
+studyTickHandle = setInterval(studyTick, 1000);
+// Lưu định kỳ để không mất dữ liệu nếu tắt tab đột ngột
+setInterval(saveData, 15000);
+window.addEventListener("beforeunload", saveData);
+window.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") markActivity(); });
+
+renderStudyTime();
+
+
 buildTaskCards();
 updateDashboard();
 </script>
