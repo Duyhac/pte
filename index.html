@@ -204,6 +204,17 @@ canvas{ max-height:170px; }
 .adapt-badge{ font-size:9px; padding:1px 6px; border-radius:8px; margin-left:6px; vertical-align:middle; }
 .adapt-badge.boost{ background:#ef444422; color:var(--red); }
 .adapt-badge.reduce{ background:#22c55e22; color:var(--green); }
+
+/* AUTO-PRIORITY task card states */
+.task-card{ transition:opacity .3s, transform .3s, border-color .3s; border:1px solid transparent; order:5; }
+.task-card.status-critical{ border-color:var(--red); box-shadow:0 0 0 1px #ef444433; order:1; }
+.task-card.status-focus{ border-color:var(--yellow); order:2; }
+.task-card.status-maintain{ order:3; }
+.task-card.status-rest{ opacity:.5; order:4; }
+.task-card.status-unknown{ opacity:.85; order:6; }
+.task-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:12px; }
+.task-card.status-critical .task-name::before{ content:"🚨 "; }
+.task-card.status-rest .task-name::before{ content:"💤 "; }
 </style>
 </head>
 <body>
@@ -291,6 +302,7 @@ canvas{ max-height:170px; }
 <!-- TASKS -->
 <div class="section">
   <h2>📝 22 Tasks — nhập từng bài theo ngày</h2>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:10px">🚨 Task CRITICAL tự động đẩy lên đầu (viền đỏ) · 💤 Task đã vượt target tự mờ xuống cuối (REST, giảm tải).</p>
   <div id="taskContainer" class="task-grid"></div>
 </div>
 
@@ -751,6 +763,7 @@ function updateDashboard(){
   renderWeeklyReport();
   renderStreakPanel();
   updateAllTaskTotals();
+  applyTaskCardPriority(adaptStatus);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -970,6 +983,7 @@ function buildTaskCards(){
 
     const card = document.createElement("div");
     card.className="task-card";
+    card.dataset.id=id;
     card.innerHTML=`
       <div class="task-header">
         <div class="task-name">${en} ${isToday?"🔔":""}<span class="adapt-badge" id="adapbadge_${esc(id)}"></span></div>
@@ -1174,6 +1188,16 @@ function updateTaskTotal(taskId){
 
 function updateAllTaskTotals(){
   TASKS.forEach(([id])=>updateTaskTotal(id));
+}
+
+// ── AUTO PRIORITY: tự kéo task CRITICAL lên đầu lưới, tự làm mờ/giảm tải task REST
+function applyTaskCardPriority(adaptStatus){
+  document.querySelectorAll(".task-card").forEach(card=>{
+    const id = card.dataset.id;
+    const st = adaptStatus[id]?.status || "UNKNOWN";
+    card.classList.remove("status-critical","status-focus","status-maintain","status-rest","status-unknown");
+    card.classList.add(`status-${st.toLowerCase()}`);
+  });
 }
 
 // ════════════════════════════════════════════════════════════
