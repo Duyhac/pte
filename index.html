@@ -153,6 +153,13 @@ canvas{ max-height:170px; }
 </style>
 </head>
 <body>
+
+<div style="background:#14532d;color:white;padding:12px;border-radius:10px;margin:10px 0">
+<b>PTE V6 Upgrade</b><br>
+Estimated PTE Score (10-90 scale) enabled.
+Target: 55+
+</div>
+
 <div class="container">
 
 <h1>🎯 PTE 55 MASTER TRACKER</h1>
@@ -173,7 +180,7 @@ canvas{ max-height:170px; }
   </div>
   <div class="card"><div class="label">Weighted Score</div><div class="value" id="weightedScore">—</div></div>
   <div class="card"><div class="label">Raw Accuracy</div><div class="value" id="overallAccuracy">—</div></div>
-  <div class="card"><div class="label">Streak</div><div class="value" id="streakCount">0 🔥</div></div>
+  <div class="card"><div class="label">Streak</div><div class="value" id="streakCount">0 🔥</div></div><div class="card"><div class="label">Speaking</div><div class="value" id="skillSpeaking">—</div></div><div class="card"><div class="label">Writing</div><div class="value" id="skillWriting">—</div></div><div class="card"><div class="label">Reading</div><div class="value" id="skillReading">—</div></div><div class="card"><div class="label">Listening</div><div class="value" id="skillListening">—</div></div>
 </div>
 
 <!-- BUTTONS -->
@@ -214,7 +221,7 @@ canvas{ max-height:170px; }
   </div>
   <div id="tab-chart">
     <canvas id="accuracyChart" height="70"></canvas><br>
-    <canvas id="predictionChart" height="70"></canvas>
+    <canvas id="predictionChart" height="70"></canvas><br><canvas id="skillRadarChart" height="70"></canvas>
   </div>
   <div id="tab-table" style="display:none">
     <table class="history-table">
@@ -312,7 +319,7 @@ const TODAY_DOW = new Date().getDay(); // 0=CN
 function fmtDate(s){ const[,m,d]=s.split("-"); return `${d}/${m}`; }
 
 function parseScore(v){
-  const m=(v||"").trim().match(/^(\d+)\s*\/\s*(\d+)$/);
+  const m=(v||"").trim().match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
   return m?{raw:+m[1],max:+m[2]}:null;
 }
 
