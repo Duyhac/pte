@@ -178,24 +178,6 @@
             color: var(--muted);
             margin-top: 2px;
         }
-        .dash-card .progress-ring-mini {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 4px;
-        }
-        .dash-card .progress-ring-mini .pbar {
-            flex: 1;
-            height: 4px;
-            background: #1e293b;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .dash-card .progress-ring-mini .pbar .fill {
-            height: 4px;
-            border-radius: 4px;
-            transition: width .5s;
-        }
 
         /* BUTTONS */
         .btn-row {
@@ -235,10 +217,71 @@
             margin-bottom: 12px;
         }
 
+        /* GOAL TRACKER GRID - NEW */
+        .goal-tracker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .goal-tracker-item {
+            background: #111827;
+            border-radius: 10px;
+            padding: 12px 16px;
+            text-align: center;
+        }
+        .goal-tracker-item .label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+        .goal-tracker-item .value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+        .goal-tracker-item .value.good {
+            color: var(--green);
+        }
+        .goal-tracker-item .value.warn {
+            color: var(--yellow);
+        }
+        .goal-tracker-item .value.bad {
+            color: var(--red);
+        }
+        .goal-tracker-item .value.neutral {
+            color: var(--text);
+        }
+        .goal-tracker-item .status-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 14px;
+            border-radius: 20px;
+            margin-top: 2px;
+        }
+        .goal-tracker-item .status-badge.need {
+            background: #ef444422;
+            color: var(--red);
+        }
+        .goal-tracker-item .status-badge.almost {
+            background: #f59e0b22;
+            color: var(--yellow);
+        }
+        .goal-tracker-item .status-badge.achieved {
+            background: #22c55e22;
+            color: var(--green);
+        }
+        .goal-tracker-item .status-badge.mastered {
+            background: #22c55e44;
+            color: var(--green);
+        }
+
         /* KPI GRID */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 10px;
         }
         .kpi-card {
@@ -940,7 +983,6 @@
             }
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -1045,6 +1087,12 @@
             <input type="file" id="importFile" accept=".json" style="display:none">
         </div>
 
+        <!-- === GOAL TRACKER (NEW) === -->
+        <div class="section" id="goalTrackerSection">
+            <h2>🎯 Goal Tracker — <span id="goalRangeLabel">Hôm nay</span></h2>
+            <div id="goalTrackerGrid" class="goal-tracker-grid"></div>
+        </div>
+
         <!-- PRIORITY DASHBOARD -->
         <div class="section">
             <h2>🚨 Priority Dashboard — <span id="priorityRangeLabel">Hôm nay</span></h2>
@@ -1052,9 +1100,9 @@
             <div id="priorityGrid" class="priority-grid"></div>
         </div>
 
-        <!-- GOAL TRACKER -->
+        <!-- TASK KPI GRID (individual tasks) -->
         <div class="section">
-            <h2>🎯 Goal Tracker — <span id="rangeLabel">Hôm nay</span></h2>
+            <h2>📊 Task KPI — <span id="rangeLabel">Hôm nay</span></h2>
             <div id="kpiGrid" class="kpi-grid"></div>
         </div>
 
@@ -1111,7 +1159,6 @@
     <script>
         // ═══════════════════════════════════════════════════════════════════
         //  TASK DEFINITIONS — 14 tasks (PTE 55+)
-        //  [id, EN, VI, overall%, skill, scheduleDOW]
         // ═══════════════════════════════════════════════════════════════════
         const TASKS = [
             ["RA", "Read Aloud", "Đọc thành tiếng", 4, "speaking", [1, 0]],
@@ -1148,7 +1195,15 @@
             WFD: 55
         };
 
-        // ── SKILL CONTRIBUTIONS (from screenshot, weighted) ──
+        // ── SKILL TARGETS (for Radar) ──
+        const SKILL_TARGETS = {
+            speaking: 55,
+            writing: 60,
+            reading: 55,
+            listening: 55
+        };
+
+        // ── SKILL CONTRIBUTIONS ──
         const SKILL_CONTRIB = {
             RA: { speaking: 9 },
             RS: { speaking: 16, listening: 17 },
@@ -1213,7 +1268,6 @@
             { dow: 0, name: "CN", tasks: ["RA", "RS", "WFD"], note: "Ôn tổng hợp" },
         ];
 
-        // ── Exam date ──
         const EXAM_DATE = new Date("2026-07-20");
 
         // ═══════════════════════════════════════════════════════════════════
@@ -1226,7 +1280,7 @@
         const DATA = loadData();
         if (!DATA.__history) DATA.__history = [];
         if (!DATA.__daily) DATA.__daily = {};
-        if (!DATA.__trend) DATA.__trend = {}; // track 3-day trend per task
+        if (!DATA.__trend) DATA.__trend = {};
 
         // ═══════════════════════════════════════════════════════════════════
         //  HELPERS
@@ -1305,7 +1359,16 @@
 
         function esc(s) { return s.replace(/[^a-zA-Z0-9]/g, "_"); }
 
-        // ── PREDICTION: weightedPercent * 0.9 ──
+        // ── NEW: Goal Status function ──
+        function getGoalStatus(current, target) {
+            if (current < target - 10) return "Need Work";
+            if (current < target) return "Almost There";
+            if (current === target) return "Achieved";
+            if (current >= target + 10) return "Mastered";
+            return "Achieved";
+        }
+
+        // ── PREDICTION: weightedPercent * 0.9 (đã đúng) ──
         function calcPrediction(dayList) {
             let weightedSum = 0,
                 totalWeight = 0,
@@ -1318,10 +1381,10 @@
             });
             if (!hasData) return null;
             const weightedPct = totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0;
-            return weightedPct * 0.9;
+            return Math.min(90, weightedPct * 0.9);
         }
 
-        // ── SKILL SCORE (0–90 scale) ──
+        // ── SKILL SCORE ──
         function calcSkillScore(skill, dayList) {
             let wSum = 0,
                 totalContrib = 0,
@@ -1366,7 +1429,7 @@
             return s;
         }
 
-        // ── 3-day trend for dynamic load balancing ──
+        // ── 3-day trend ──
         function getTaskTrend(id) {
             const days = [];
             for (let i = 1; i <= 3; i++) {
@@ -1377,7 +1440,6 @@
                 if (c.max > 0) days.push(c.pct);
             }
             if (days.length < 3) return null;
-            // Check if all 3 days are above target + 5
             const target = KPI_TARGETS[id] || 55;
             const above = days.every(p => p >= target + 5);
             const below = days.every(p => p < target);
@@ -1410,11 +1472,10 @@
                 else if (st === "REST") action = "Giảm còn 1 set cuối tuần";
                 else action = "Cần dữ liệu";
 
-                // Dynamic load balancer: check 3-day trend
                 const trend = getTaskTrend(id);
                 let loadAdj = 0;
-                if (trend === "above") loadAdj = -0.2; // giảm 20%
-                else if (trend === "below") loadAdj = 0.1; // tăng 10%
+                if (trend === "above") loadAdj = -0.2;
+                else if (trend === "below") loadAdj = 0.1;
 
                 status[id] = { status: st, urgency, acc, target, gap: Math.max(0, gap), weight: w, action, hasData,
                     trend, loadAdj };
@@ -1445,7 +1506,6 @@
                 const minPer = id => MIN_PER_REP[id] || 5;
                 let used = active.reduce((s, id) => s + minPer(id), 0);
 
-                // Apply load balancing adjustment
                 active.forEach(id => {
                     const adj = adaptStatus[id]?.loadAdj || 0;
                     if (adj !== 0) {
@@ -1517,6 +1577,7 @@
             const rangeLabels = { today: "Hôm nay", "7days": "7 ngày qua", all: "Tất cả" };
             document.getElementById("rangeLabel").textContent = rangeLabels[currentRange];
             document.getElementById("priorityRangeLabel").textContent = rangeLabels[currentRange];
+            document.getElementById("goalRangeLabel").textContent = rangeLabels[currentRange];
             document.getElementById("todayLabel").textContent = fmtDate(TODAY);
 
             const daysLeft = daysUntilExam();
@@ -1557,6 +1618,9 @@
                 }
             });
 
+            // ── NEW: Render Goal Tracker ──
+            renderGoalTracker(pred);
+
             // Save history
             const allDays = getAllDays();
             const allAcc = calcRawAccOverDays(allDays);
@@ -1590,6 +1654,45 @@
             renderStreakPanel();
             updateAllTaskTotals();
             applyTaskPriority(adaptStatus);
+        }
+
+        // ── NEW: Goal Tracker Render ──
+        function renderGoalTracker(pred) {
+            const el = document.getElementById("goalTrackerGrid");
+            const target = 55;
+            const current = pred !== null ? pred : 0;
+            const gap = current - target;
+            const status = getGoalStatus(current, target);
+
+            let statusClass = "neutral";
+            let statusBadgeClass = "need";
+            if (status === "Mastered") { statusClass = "good";
+                statusBadgeClass = "mastered"; } else if (status === "Achieved") { statusClass = "good";
+                statusBadgeClass = "achieved"; } else if (status === "Almost There") { statusClass = "warn";
+                statusBadgeClass = "almost"; } else if (status === "Need Work") { statusClass = "bad";
+                statusBadgeClass = "need"; }
+
+            const displayCurrent = pred !== null ? current.toFixed(1) + "%" : "—";
+            const displayGap = pred !== null ? (gap >= 0 ? `+${gap.toFixed(1)}%` : `${gap.toFixed(1)}%`) : "—";
+
+            el.innerHTML = `
+                <div class="goal-tracker-item">
+                    <div class="label">Current</div>
+                    <div class="value ${pred !== null ? statusClass : 'neutral'}">${displayCurrent}</div>
+                </div>
+                <div class="goal-tracker-item">
+                    <div class="label">Target</div>
+                    <div class="value neutral">${target}%</div>
+                </div>
+                <div class="goal-tracker-item">
+                    <div class="label">Gap</div>
+                    <div class="value ${pred !== null ? statusClass : 'neutral'}">${displayGap}</div>
+                </div>
+                <div class="goal-tracker-item">
+                    <div class="label">Status</div>
+                    <div><span class="status-badge ${statusBadgeClass}">${pred !== null ? status : '—'}</span></div>
+                </div>
+            `;
         }
 
         // ── PRIORITY ──
@@ -1688,7 +1791,7 @@
                 const pct = sc !== null ? (sc / 90) * 100 : 0;
                 const display = sc !== null ? sc.toFixed(1) : "—";
                 const cls = sc !== null ? (sc >= 55 ? "good" : sc >= 40 ? "warn" : "bad") : "";
-                const target = 55;
+                const target = SKILL_TARGETS[s.key] || 55;
                 const gap = sc !== null ? sc - target : null;
                 const gapDisplay = gap !== null ? (gap >= 0 ? `+${gap.toFixed(1)}` : `${gap.toFixed(1)}`) : "—";
                 return `
@@ -2030,11 +2133,13 @@
                 options: baseOpts
             });
 
+            // ── RADAR CHART: Dynamic targets ──
             const allDays = getAllDays();
             const sp = calcSkillScore("speaking", allDays) || 0;
             const wr = calcSkillScore("writing", allDays) || 0;
             const rd = calcSkillScore("reading", allDays) || 0;
             const li = calcSkillScore("listening", allDays) || 0;
+
             const c3 = document.getElementById("radarChart").getContext("2d");
             if (radarChart) radarChart.destroy();
             radarChart = new Chart(c3, {
@@ -2044,8 +2149,13 @@
                     datasets: [
                         { label: "Hiện tại", data: [sp, wr, rd, li], borderColor: "#38bdf8",
                             backgroundColor: "rgba(56,189,248,.15)", pointRadius: 3 },
-                        { label: "Target (55)", data: [55, 55, 55, 55], borderColor: "#ef4444",
-                            backgroundColor: "transparent", borderDash: [4, 4], pointRadius: 0 }
+                        { label: "Target", data: [
+                                SKILL_TARGETS.speaking,
+                                SKILL_TARGETS.writing,
+                                SKILL_TARGETS.reading,
+                                SKILL_TARGETS.listening
+                            ], borderColor: "#ef4444", backgroundColor: "transparent", borderDash: [4, 4],
+                            pointRadius: 0 }
                     ]
                 },
                 options: {
@@ -2218,7 +2328,6 @@
         buildTaskCards();
         renderAll();
 
-        // Auto-save
         setInterval(saveData, 30000);
         window.addEventListener("beforeunload", saveData);
     </script>
