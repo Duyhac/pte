@@ -1212,7 +1212,10 @@
 
         const DAILY_TASKS = ["RS", "WFD"];
 
-        const DOW_HOURS = { 1: 10, 2: 4, 3: 4, 4: 10, 5: 4, 6: 10, 0: 10 };
+        // Budget PTE thực tế sau khi trừ lịch học trên trường:
+        // T2=10h, T3=5h (trường 12:50-16:00), T4=2h (trường 12:50-17:40, học sáng/tối)
+        // T5=10h, T6=2h (trường 12:50-17:40), T7=10h, CN=10h
+        const DOW_HOURS = { 1: 10, 2: 5, 3: 2, 4: 10, 5: 2, 6: 10, 0: 10 };
 
         const MIN_PER_REP = {
             RA: 1.5,
@@ -1231,26 +1234,43 @@
             WFD: 3,
         };
 
+        // Cap số bài tối đa mỗi ngày — trung bình 15-20 bài/task
+        // Task dài (WE=20ph, SWT=10ph, SST=10ph) giữ cap thấp vì tốn thời gian
         const MAX_REPS_OVERRIDE = {
             WE: 2,
             SWT: 3,
             SST: 2,
-            DI: 6,
-            RL: 6,
-            SGD: 5,
-            RTS: 6,
+            RL: 10,
+            SGD: 10,
+            DI: 15,
+            RTS: 15,
+            FDD: 15,
+            SMW: 15,
+            RA: 20,
+            RS: 20,
+            FIB: 20,
+            FIL: 20,
+            WFD: 20,
         };
 
         function capFor(id) { return MAX_REPS_OVERRIDE[id] || 12; }
 
         const WEEK_PLAN = [
-            { dow: 1, name: "Thứ 2", tasks: ["DI", "RL", "RA", "RS", "WFD"], note: "Speaking nặng" },
-            { dow: 2, name: "Thứ 3", tasks: ["SGD", "RTS", "RS", "WFD"], note: "Speaking nhóm" },
-            { dow: 3, name: "Thứ 4", tasks: ["SWT", "WE", "FIB", "RS", "WFD"], note: "Writing + Reading" },
-            { dow: 4, name: "Thứ 5", tasks: ["FDD", "FIB", "RS", "WFD"], note: "Reading" },
-            { dow: 5, name: "Thứ 6", tasks: ["SST", "FIL", "RS", "WFD"], note: "Listening" },
-            { dow: 6, name: "Thứ 7", tasks: ["FIL", "SMW", "FDD", "RS", "WFD"], note: "Listening + Reading" },
-            { dow: 0, name: "CN", tasks: ["RA", "RS", "WFD"], note: "Ôn tổng hợp" },
+            // Phân bổ 14 tasks đủ full tuần, RS+WFD daily mỗi ngày
+            // T2(10h): Speaking nặng — DI(15%), RL(6%), RA(4%)
+            { dow: 1, name: "Thứ 2", tasks: ["DI", "RL", "RA", "RS", "WFD"], note: "Speaking nặng · 10h" },
+            // T3(5h): Speaking nhóm — SGD(9%), RTS(6%)
+            { dow: 2, name: "Thứ 3", tasks: ["SGD", "RTS", "RS", "WFD"], note: "Speaking nhóm · 5h (trường chiều)" },
+            // T4(2h): Writing — SWT(7%), chỉ 2h nên 1 task chính
+            { dow: 3, name: "Thứ 4", tasks: ["SWT", "RS", "WFD"], note: "Writing · 2h (trường chiều)" },
+            // T5(10h): Reading + Writing — FIB(7%), FDD(6%), WE(7%)
+            { dow: 4, name: "Thứ 5", tasks: ["FIB", "FDD", "WE", "RS", "WFD"], note: "Reading + Writing · 10h" },
+            // T6(2h): Listening — SST(4%), chỉ 2h nên 1 task chính
+            { dow: 5, name: "Thứ 6", tasks: ["SST", "RS", "WFD"], note: "Listening · 2h (trường chiều)" },
+            // T7(10h): Listening đầy đủ — FIL(3%), SMW(1%), + ôn RA
+            { dow: 6, name: "Thứ 7", tasks: ["FIL", "SMW", "RA", "RS", "WFD"], note: "Listening + RA · 10h" },
+            // CN(10h): Ôn tổng hợp — SGD bổ sung, DI luyện thêm, RL
+            { dow: 0, name: "CN", tasks: ["DI", "RL", "SGD", "SWT", "RS", "WFD"], note: "Ôn tổng hợp · 10h" },
         ];
 
         const EXAM_DATE = new Date("2026-07-20");
@@ -1471,10 +1491,30 @@
         }
 
         function getAdaptivePlan(adaptStatus) {
+            // Map skill → ngày phù hợp để inject task INTENSIVE
+            const skillDayMap = {
+                speaking:  [1, 2],
+                writing:   [3],
+                reading:   [3, 4],
+                listening: [5, 6],
+                mixed:     [0],
+            };
             return WEEK_PLAN.map(day => {
                 const base = [...day.tasks];
+                // Chỉ inject INTENSIVE task nếu:
+                //  1. Task đó có data thật (hasData) — tránh inject khi chưa nhập gì
+                //  2. Ngày này đúng với skill của task
                 const criticals = Object.entries(adaptStatus)
-                    .filter(([id, s]) => s.status === "INTENSIVE" && !base.includes(id) && !DAILY_TASKS.includes(id))
+                    .filter(([id, s]) => {
+                        if (s.status !== "INTENSIVE") return false;
+                        if (base.includes(id)) return false;
+                        if (DAILY_TASKS.includes(id)) return false;
+                        if (!s.hasData) return false; // không inject khi chưa có data
+                        const task = TASKS.find(t => t[0] === id);
+                        if (!task) return false;
+                        const allowedDays = skillDayMap[task[4]] || task[5];
+                        return allowedDays.includes(day.dow);
+                    })
                     .sort((a, b) => b[1].urgency - a[1].urgency)
                     .slice(0, 2)
                     .map(([id]) => id);
@@ -1527,8 +1567,15 @@
 
                 const leftoverMin = Math.max(0, budgetMin - used);
                 const leftoverNote = (leftoverMin >= 60) ?
-                    `Còn dư ~${(leftoverMin/60).toFixed(1)}h — làm 1 mock test hoặc ôn lỗi sai` :
+                    `Còn dư ~${(leftoverMin/60).toFixed(1)}h — ôn lại lỗi sai hoặc tăng thêm số bài` :
                     null;
+
+                // Check if any task has real data
+                const anyData = finalTasks.some(id => {
+                    const allDays = getAllDays();
+                    return allDays.some(d => (DATA.__daily[d]?.[id] || []).some(v => parseScore(v)));
+                });
+                const noDataNote = !anyData ? "Nhập điểm để kích hoạt Adaptive Plan — số bài sẽ tự điều chỉnh theo điểm thực tế" : null;
 
                 return {
                     ...day,
@@ -1537,6 +1584,7 @@
                     usedMin: used,
                     leftoverMin,
                     leftoverNote,
+                    noDataNote,
                     taskMeta: finalTasks.map(id => ({
                         id,
                         isDaily: DAILY_TASKS.includes(id),
@@ -1843,6 +1891,7 @@
                 </div>
                 <div style="font-size:10px;color:#475569;margin-bottom:6px">${p.note} · ⏱ ${usedHrs}/${budgetHrs}h</div>
                 ${p.leftoverNote ? `<div style="font-size:9px;color:var(--yellow);background:#f59e0b14;border-radius:6px;padding:3px 6px;margin-bottom:6px">⚠ ${p.leftoverNote}</div>` : ""}
+                ${p.noDataNote ? `<div style="font-size:9px;color:var(--muted);background:#1e293b;border-radius:6px;padding:3px 6px;margin-bottom:6px">💡 ${p.noDataNote}</div>` : ""}
                 <div class="plan-tasks">${taskItems}</div>
               </div>`;
             }).join("");
