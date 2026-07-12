@@ -1,2396 +1,917 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTE 55+ Tracker V8</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
-    </script>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --green: #22c55e;
-            --red: #ef4444;
-            --yellow: #f59e0b;
-            --purple: #a78bfa;
-            --orange: #fb923c;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-        body {
-            background: var(--bg);
-            color: var(--text);
-            padding: 16px;
-        }
-        .container {
-            max-width: 1440px;
-            margin: auto;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PTE 8-Day Final Sprint</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;800&display=swap');
 
-        .goal-banner {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 14px;
-            padding: 18px 24px;
-            margin-bottom: 18px;
-            border-left: 5px solid var(--yellow);
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-        .goal-banner .left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .goal-banner .badge {
-            background: var(--yellow);
-            color: #0f172a;
-            font-weight: 800;
-            font-size: 14px;
-            padding: 4px 16px;
-            border-radius: 30px;
-            letter-spacing: .5px;
-        }
-        .goal-banner .exam-date {
-            color: var(--muted);
-            font-size: 13px;
-        }
-        .goal-banner .exam-date strong {
-            color: var(--text);
-        }
-        .goal-banner .days-left {
-            background: var(--accent);
-            color: #0f172a;
-            font-weight: 700;
-            font-size: 15px;
-            padding: 4px 16px;
-            border-radius: 30px;
-        }
-        .goal-banner .progress-ring {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .goal-banner .ring-label {
-            font-size: 12px;
-            color: var(--muted);
-            text-align: center;
-        }
-        .goal-banner .ring-value {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--yellow);
-        }
-        .goal-banner .ring-value.good {
-            color: var(--green);
-        }
-        .goal-banner .ring-value.warn {
-            color: var(--yellow);
-        }
-        .goal-banner .ring-value.bad {
-            color: var(--red);
-        }
+:root {
+  --bg: #060a14;
+  --surface: #0d1525;
+  --card: #111c30;
+  --border: #1e3050;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --dim: #334155;
 
-        h1 {
-            font-size: 22px;
-            margin-bottom: 2px;
-        }
-        .subtitle {
-            color: var(--muted);
-            font-size: 13px;
-            margin-bottom: 14px;
-        }
+  --red: #ef4444;
+  --red-glow: #ef444433;
+  --orange: #f97316;
+  --yellow: #eab308;
+  --green: #22c55e;
+  --green-glow: #22c55e22;
+  --blue: #38bdf8;
+  --blue-glow: #38bdf822;
+  --purple: #a78bfa;
 
-        .filter-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .filter-btn {
-            padding: 6px 20px;
-            border-radius: 30px;
-            font-size: 13px;
-            cursor: pointer;
-            background: #1e293b;
-            color: var(--muted);
-            border: 1px solid #334155;
-            font-weight: 600;
-            transition: .2s;
-        }
-        .filter-btn.active {
-            background: var(--accent);
-            color: #0f172a;
-            border-color: var(--accent);
-        }
-        .filter-btn:hover {
-            opacity: .8;
-        }
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', Arial, sans-serif;
+}
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .dash-card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 14px 16px;
-        }
-        .dash-card .label {
-            color: var(--muted);
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-            margin-bottom: 4px;
-        }
-        .dash-card .value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .dash-card .value.good {
-            color: var(--green);
-        }
-        .dash-card .value.warn {
-            color: var(--yellow);
-        }
-        .dash-card .value.bad {
-            color: var(--red);
-        }
-        .dash-card .sub {
-            font-size: 10px;
-            color: var(--muted);
-            margin-top: 2px;
-        }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); padding:20px; line-height:1.5; }
+.container { max-width:1100px; margin:auto; }
 
-        .btn-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-        .btn-row button {
-            background: var(--accent);
-            color: #0f172a;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 13px;
-            transition: .2s;
-        }
-        .btn-row button:hover {
-            opacity: .8;
-        }
-        .btn-row button.danger {
-            background: var(--red);
-            color: #fff;
-        }
+/* ── HEADER ── */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+}
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.title-block h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+.title-block h1 span { color: var(--red); }
+.title-block .sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+  font-family: var(--mono);
+}
+.countdown-box {
+  background: var(--card);
+  border: 1px solid var(--red);
+  border-radius: 12px;
+  padding: 14px 24px;
+  text-align: center;
+  box-shadow: 0 0 20px var(--red-glow);
+  min-width: 140px;
+}
+.countdown-box .num {
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--red);
+  line-height: 1;
+  font-family: var(--mono);
+}
+.countdown-box .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
-        .section {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 18px;
-        }
-        .section h2 {
-            font-size: 15px;
-            margin-bottom: 12px;
-        }
+/* ── ALERT BANNER ── */
+.alert {
+  background: linear-gradient(135deg, #1a0a0a, #0d1525);
+  border: 1px solid var(--red);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #fca5a5;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
 
-        /* GOAL TRACKER GRID */
-        .goal-tracker-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-top: 4px;
-        }
-        .goal-tracker-item {
-            background: #111827;
-            border-radius: 10px;
-            padding: 12px 16px;
-            text-align: center;
-        }
-        .goal-tracker-item .label {
-            font-size: 10px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .4px;
-        }
-        .goal-tracker-item .value {
-            font-size: 22px;
-            font-weight: 700;
-            margin-top: 2px;
-        }
-        .goal-tracker-item .value.good {
-            color: var(--green);
-        }
-        .goal-tracker-item .value.warn {
-            color: var(--yellow);
-        }
-        .goal-tracker-item .value.bad {
-            color: var(--red);
-        }
-        .goal-tracker-item .value.neutral {
-            color: var(--text);
-        }
-        .goal-tracker-item .status-badge {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 14px;
-            border-radius: 20px;
-            margin-top: 2px;
-        }
-        .goal-tracker-item .status-badge.need {
-            background: #ef444422;
-            color: var(--red);
-        }
-        .goal-tracker-item .status-badge.almost {
-            background: #f59e0b22;
-            color: var(--yellow);
-        }
-        .goal-tracker-item .status-badge.achieved {
-            background: #22c55e22;
-            color: var(--green);
-        }
-        .goal-tracker-item .status-badge.mastered {
-            background: #22c55e44;
-            color: var(--green);
-        }
+/* ── CURRENT SCORES ── */
+.scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.score-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.score-card .label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 4px;
+}
+.score-card .val {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--mono);
+}
+.score-card .gap-tag {
+  font-size: 10px;
+  font-family: var(--mono);
+  margin-top: 2px;
+}
+.c-red { color: var(--red); }
+.c-orange { color: var(--orange); }
+.c-yellow { color: var(--yellow); }
+.c-green { color: var(--green); }
+.c-blue { color: var(--blue); }
+.c-muted { color: var(--muted); }
+.score-card.urgent { border-color: var(--red); background: linear-gradient(135deg, #1a0808, #111c30); }
+.score-card.warn { border-color: var(--yellow); }
+.score-card.ok { border-color: var(--green); }
 
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 10px;
-        }
-        .kpi-card {
-            background: #111827;
-            border-radius: 10px;
-            padding: 12px 14px;
-            border-left: 3px solid transparent;
-        }
-        .kpi-card.status-need {
-            border-left-color: var(--red);
-        }
-        .kpi-card.status-almost {
-            border-left-color: var(--yellow);
-        }
-        .kpi-card.status-achieved {
-            border-left-color: var(--green);
-        }
-        .kpi-card.status-mastered {
-            border-left-color: #22c55e88;
-        }
-        .kpi-title {
-            color: var(--muted);
-            font-size: 11px;
-            margin-bottom: 4px;
-        }
-        .kpi-score {
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .kpi-score.good {
-            color: var(--green);
-        }
-        .kpi-score.warn {
-            color: var(--yellow);
-        }
-        .kpi-score.bad {
-            color: var(--red);
-        }
-        .kpi-score.na {
-            color: var(--muted);
-        }
-        .kpi-sub {
-            font-size: 11px;
-            color: var(--muted);
-        }
-        .kpi-status {
-            display: inline-block;
-            font-size: 10px;
-            padding: 1px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-        .kpi-status.need {
-            background: #ef444422;
-            color: var(--red);
-        }
-        .kpi-status.almost {
-            background: #f59e0b22;
-            color: var(--yellow);
-        }
-        .kpi-status.achieved {
-            background: #22c55e22;
-            color: var(--green);
-        }
-        .kpi-status.mastered {
-            background: #22c55e44;
-            color: var(--green);
-        }
-        .kpi-status.na {
-            background: #47556944;
-            color: var(--muted);
-        }
+/* ── SECTION ── */
+.section { margin-bottom: 32px; }
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.section-title h2 { font-size: 16px; font-weight: 700; }
+.section-title .tag {
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-family: var(--mono);
+}
+.tag-red { background: var(--red-glow); color: var(--red); }
+.tag-blue { background: var(--blue-glow); color: var(--blue); }
+.tag-green { background: var(--green-glow); color: var(--green); }
 
-        .skill-breakdown {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 12px;
-        }
-        .skill-item {
-            background: #111827;
-            border-radius: 10px;
-            padding: 12px 14px;
-        }
-        .skill-item .label {
-            font-size: 12px;
-            color: var(--muted);
-            display: flex;
-            justify-content: space-between;
-        }
-        .skill-item .label .val {
-            font-weight: 700;
-        }
-        .skill-item .label .val.good {
-            color: var(--green);
-        }
-        .skill-item .label .val.warn {
-            color: var(--yellow);
-        }
-        .skill-item .label .val.bad {
-            color: var(--red);
-        }
-        .skill-bar-bg {
-            background: #1e293b;
-            border-radius: 4px;
-            height: 6px;
-            margin: 6px 0;
-            overflow: hidden;
-        }
-        .skill-bar-fill {
-            height: 6px;
-            border-radius: 4px;
-            transition: width .6s;
-        }
-        .skill-item .gap {
-            font-size: 10px;
-            color: var(--muted);
-        }
+/* ── RA NOTE ── */
+.ra-note {
+  background: linear-gradient(135deg, #0a1a2a, #111c30);
+  border: 1px solid var(--blue);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.ra-note h3 { font-size: 14px; color: var(--blue); margin-bottom: 10px; }
+.ra-note-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media(max-width:600px){ .ra-note-grid { grid-template-columns: 1fr; } }
+.ra-method {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+.ra-method .method-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.ra-method .method-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+.ra-method ul {
+  list-style: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--text);
+}
+.ra-method ul li {
+  padding: 3px 0;
+  display: flex;
+  gap: 6px;
+}
+.ra-method ul li::before { content: "→"; color: var(--blue); flex-shrink: 0; }
+.ra-old {
+  text-decoration: line-through;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
 
-        .priority-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 10px;
-        }
-        .priority-card {
-            background: #111827;
-            border-radius: 10px;
-            padding: 12px;
-            border-left: 3px solid var(--red);
-        }
-        .priority-card.p-rest {
-            border-left-color: #334155;
-            opacity: .7;
-        }
-        .priority-card.p-maintain {
-            border-left-color: var(--green);
-        }
-        .priority-card.p-focus {
-            border-left-color: var(--yellow);
-        }
-        .priority-card.p-intensive {
-            border-left-color: var(--red);
-        }
-        .priority-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-        .priority-task-name {
-            font-size: 13px;
-            font-weight: 700;
-        }
-        .priority-badge {
-            font-size: 9px;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-weight: 700;
-        }
-        .priority-badge.INTENSIVE {
-            background: #ef444422;
-            color: var(--red);
-        }
-        .priority-badge.FOCUS {
-            background: #f59e0b22;
-            color: var(--yellow);
-        }
-        .priority-badge.MAINTAIN {
-            background: #22c55e22;
-            color: var(--green);
-        }
-        .priority-badge.REST {
-            background: #47556944;
-            color: var(--muted);
-        }
-        .priority-badge.UNKNOWN {
-            background: #47556944;
-            color: var(--muted);
-        }
-        .priority-bar-bg {
-            background: #1e293b;
-            border-radius: 4px;
-            height: 5px;
-            margin: 5px 0;
-            overflow: hidden;
-            position: relative;
-        }
-        .priority-bar-fill {
-            height: 5px;
-            border-radius: 4px;
-        }
-        .priority-bar-target {
-            position: absolute;
-            top: -1px;
-            width: 2px;
-            height: 7px;
-            background: #64748b;
-            border-radius: 1px;
-        }
-        .priority-meta {
-            font-size: 10px;
-            color: var(--muted);
-            display: flex;
-            justify-content: space-between;
-        }
-        .priority-action {
-            font-size: 10px;
-            margin-top: 6px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            background: #1e293b;
-            color: var(--accent);
-        }
+/* ── 8-DAY GRID ── */
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.day-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.day-card.today { border-color: var(--blue); box-shadow: 0 0 16px var(--blue-glow); }
+.day-card.past { opacity: .55; }
+.day-card.exam { border-color: var(--red); box-shadow: 0 0 20px var(--red-glow); }
 
-        .plan-wrap {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-        }
-        .plan-day-card {
-            background: #111827;
-            border-radius: 10px;
-            padding: 12px;
-        }
-        .plan-day-card.today-plan {
-            border: 1px solid var(--accent);
-        }
-        .plan-day-title {
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-        .plan-day-badge {
-            font-size: 9px;
-            padding: 1px 8px;
-            border-radius: 10px;
-        }
-        .plan-day-badge.today {
-            background: var(--accent);
-            color: #0f172a;
-        }
-        .plan-tasks {
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.9;
-        }
-        .plan-tasks .daily-tag {
-            color: var(--green);
-            font-weight: 700;
-        }
-        .plan-tasks .boost-tag {
-            color: var(--red);
-            font-weight: 700;
-        }
-        .plan-tasks .rest-tag {
-            color: #475569;
-            text-decoration: line-through;
-        }
-        .adapt-legend {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-            font-size: 11px;
-            color: var(--muted);
-        }
-        .adapt-legend span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .task-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            margin-right: 4px;
-            vertical-align: middle;
-        }
+.day-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.day-header .date-info { display: flex; align-items: center; gap: 10px; }
+.day-num {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--mono);
+  line-height: 1;
+}
+.day-name { font-size: 13px; color: var(--muted); }
+.day-date { font-size: 10px; color: var(--dim); font-family: var(--mono); }
+.day-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.badge {
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.badge-today { background: var(--blue); color: #000; }
+.badge-light { background: #1e293b; color: var(--muted); }
+.badge-exam { background: var(--red); color: #fff; }
 
-        .task-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-            gap: 12px;
-        }
-        .task-card {
-            background: #111827;
-            border-radius: 10px;
-            padding: 13px;
-            border: 1px solid transparent;
-            transition: all .3s;
-        }
-        .task-card.status-intensive {
-            border-color: var(--red);
-            box-shadow: 0 0 0 1px #ef444433;
-            order: 1;
-        }
-        .task-card.status-focus {
-            border-color: var(--yellow);
-            order: 2;
-        }
-        .task-card.status-maintain {
-            order: 3;
-        }
-        .task-card.status-rest {
-            opacity: .5;
-            order: 4;
-        }
-        .task-card.status-unknown {
-            opacity: .8;
-            order: 5;
-        }
-        .task-card.status-intensive .task-name::before {
-            content: "🚨 ";
-        }
-        .task-card.status-rest .task-name::before {
-            content: "💤 ";
-        }
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 2px;
-        }
-        .task-name {
-            font-weight: 700;
-            font-size: 13px;
-        }
-        .task-weight {
-            font-size: 10px;
-            padding: 1px 8px;
-            border-radius: 10px;
-            background: #1e293b;
-            color: var(--muted);
-            white-space: nowrap;
-        }
-        .task-weight.high {
-            background: #22c55e18;
-            color: var(--green);
-        }
-        .task-weight.mid {
-            background: #f59e0b18;
-            color: var(--yellow);
-        }
-        .task-weight.low {
-            background: #47556944;
-            color: var(--muted);
-        }
-        .task-vi {
-            color: var(--muted);
-            font-size: 11px;
-            margin-bottom: 6px;
-        }
-        .task-schedule {
-            font-size: 10px;
-            color: #475569;
-            margin-bottom: 8px;
-        }
+.day-body { padding: 14px 16px; }
 
-        .day-block {
-            margin-bottom: 6px;
-            background: #0f172a;
-            border-radius: 8px;
-            padding: 6px 10px;
-        }
-        .day-block.today {
-            border: 1px solid var(--accent);
-        }
-        .day-block.collapsed .day-entries-wrap {
-            display: none;
-        }
-        .day-block-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            user-select: none;
-        }
-        .day-block-label {
-            font-size: 10px;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .today-badge {
-            background: var(--accent);
-            color: #0f172a;
-            border-radius: 3px;
-            padding: 0 5px;
-            font-size: 8px;
-            font-weight: 700;
-        }
-        .day-block-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .day-block-summary {
-            font-size: 10px;
-            font-weight: 700;
-        }
-        .day-block-summary.good {
-            color: var(--green);
-        }
-        .day-block-summary.warn {
-            color: var(--yellow);
-        }
-        .day-block-summary.bad {
-            color: var(--red);
-        }
-        .day-block-summary.empty {
-            color: #334155;
-        }
-        .collapse-icon {
-            font-size: 9px;
-            color: #475569;
-        }
-        .day-entries-wrap {
-            margin-top: 5px;
-        }
-        .entries-list {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            margin-bottom: 4px;
-        }
-        .entry-row {
-            display: grid;
-            grid-template-columns: 1fr 42px 18px;
-            align-items: center;
-            gap: 4px;
-        }
-        .entry-input {
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #1e293b;
-            color: #fff;
-            font-size: 12px;
-            padding: 2px 4px;
-            outline: none;
-            width: 100%;
-        }
-        .entry-input:focus {
-            border-bottom-color: var(--accent);
-        }
-        .entry-pct {
-            font-size: 10px;
-            text-align: right;
-            font-weight: 700;
-        }
-        .entry-pct.good {
-            color: var(--green);
-        }
-        .entry-pct.warn {
-            color: var(--yellow);
-        }
-        .entry-pct.bad {
-            color: var(--red);
-        }
-        .entry-pct.empty {
-            color: #334155;
-        }
-        .remove-btn {
-            background: none;
-            color: #475569;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 0;
-            line-height: 1;
-        }
-        .remove-btn:hover {
-            color: var(--red);
-        }
-        .add-entry-btn {
-            background: none;
-            border: 1px dashed #334155;
-            color: var(--muted);
-            border-radius: 6px;
-            padding: 3px 8px;
-            font-size: 10px;
-            cursor: pointer;
-            width: 100%;
-            transition: .2s;
-        }
-        .add-entry-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .day-total {
-            margin-top: 4px;
-            padding-top: 4px;
-            border-top: 1px solid #1e293b;
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-        }
-        .day-total-label {
-            color: var(--muted);
-        }
+.focus-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.focus-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-bottom: 12px;
+}
 
-        .task-total {
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 1px solid #1e293b;
-            font-size: 11px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .tot-label {
-            color: var(--muted);
-        }
-        .tot-val {
-            font-weight: 700;
-        }
-        .tot-val.good {
-            color: var(--green);
-        }
-        .tot-val.warn {
-            color: var(--yellow);
-        }
-        .tot-val.bad {
-            color: var(--red);
-        }
-        .tot-val.empty {
-            color: #334155;
-        }
+.task-list { display: flex; flex-direction: column; gap: 6px; }
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.task-pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+  min-width: 38px;
+  text-align: center;
+}
+.pill-red { background: #ef444420; color: var(--red); border: 1px solid #ef444440; }
+.pill-orange { background: #f9731620; color: var(--orange); border: 1px solid #f9731640; }
+.pill-yellow { background: #eab30820; color: var(--yellow); border: 1px solid #eab30840; }
+.pill-green { background: #22c55e20; color: var(--green); border: 1px solid #22c55e40; }
+.pill-blue { background: #38bdf820; color: var(--blue); border: 1px solid #38bdf840; }
+.pill-gray { background: #33415520; color: var(--muted); border: 1px solid #33415540; }
 
-        .tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-        }
-        .tab {
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            background: #111827;
-            color: var(--muted);
-            border: 1px solid #334155;
-            transition: .2s;
-        }
-        .tab.active {
-            background: var(--accent);
-            color: #0f172a;
-            border-color: var(--accent);
-            font-weight: 700;
-        }
-        .tab:hover {
-            opacity: .8;
-        }
+.task-name-text { flex: 1; color: var(--text); }
+.task-reps {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--dim);
+  white-space: nowrap;
+}
+.task-reps.boost { color: var(--red); font-weight: 700; }
+.task-reps.daily { color: var(--green); }
 
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-        .history-table th {
-            text-align: left;
-            color: var(--muted);
-            padding: 6px 10px;
-            border-bottom: 1px solid #334155;
-            font-weight: 400;
-        }
-        .history-table td {
-            padding: 6px 10px;
-            border-bottom: 1px solid #1e293b;
-        }
-        .history-table tr.today-row td {
-            color: var(--accent);
-            font-weight: 700;
-        }
+.day-note {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  border-left: 2px solid var(--dim);
+}
+.day-note.critical { border-left-color: var(--red); color: #fca5a5; background: #1a080820; }
+.day-note.strategy { border-left-color: var(--blue); color: #93c5fd; }
 
-        .report-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-        }
-        .report-card {
-            background: #111827;
-            border-radius: 8px;
-            padding: 12px;
-        }
-        .report-title {
-            color: var(--muted);
-            font-size: 10px;
-            margin-bottom: 4px;
-        }
-        .report-val {
-            font-size: 18px;
-            font-weight: 700;
-        }
-        .report-val.up {
-            color: var(--green);
-        }
-        .report-val.down {
-            color: var(--red);
-        }
-        .report-val.flat {
-            color: var(--yellow);
-        }
+.hour-bar {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.hour-bar-bg {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hour-bar-fill {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--blue);
+}
 
-        .streak-bar {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-        .streak-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-        }
-        .streak-dot.active {
-            background: var(--green);
-        }
-        .streak-dot.inactive {
-            background: #1e293b;
-        }
-        .streak-dot.today-dot {
-            border: 2px solid var(--accent);
-        }
+/* ── STRATEGY ── */
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.strategy-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.strategy-card h3 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.strategy-card ul {
+  list-style: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.strategy-card ul li {
+  display: flex;
+  gap: 6px;
+  line-height: 1.4;
+}
+.strategy-card ul li .bullet { flex-shrink: 0; color: var(--blue); }
 
-        .pred-bar-wrap {
-            margin-top: 6px;
-        }
-        .pred-bar-bg {
-            background: #1e293b;
-            border-radius: 6px;
-            height: 10px;
-            overflow: hidden;
-            margin-top: 3px;
-            position: relative;
-        }
-        .pred-bar-fill {
-            height: 10px;
-            border-radius: 6px;
-            transition: width .5s;
-        }
-        .pred-bar-target {
-            position: absolute;
-            top: 0;
-            left: 61.1%;
-            width: 2px;
-            height: 100%;
-            background: var(--red);
-            opacity: .6;
-        }
-        .pred-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 9px;
-            color: var(--muted);
-        }
+/* ── SCORE PROJECTION ── */
+.projection {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+.proj-title { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+.proj-scenarios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media(max-width:600px){ .proj-scenarios { grid-template-columns: 1fr; } }
+.proj-scenario {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.proj-scenario .scenario-name { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.proj-scenario .score { font-size: 32px; font-weight: 800; font-family: var(--mono); }
+.proj-scenario .condition { font-size: 10px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+.proj-scenario.pessimist .score { color: var(--red); }
+.proj-scenario.realistic .score { color: var(--yellow); }
+.proj-scenario.realistic { border-color: var(--yellow); }
+.proj-scenario.optimist .score { color: var(--green); }
 
-        .adapt-badge {
-            font-size: 8px;
-            padding: 1px 6px;
-            border-radius: 8px;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
-        .adapt-badge.boost {
-            background: #ef444422;
-            color: var(--red);
-        }
-        .adapt-badge.reduce {
-            background: #22c55e22;
-            color: var(--green);
-        }
+/* ── RULES ── */
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+.rule-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.rule-num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--dim);
+  font-family: var(--mono);
+  margin-bottom: 6px;
+}
+.rule-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.rule-text { font-size: 11px; color: var(--muted); line-height: 1.5; }
 
-        canvas {
-            max-height: 170px;
-        }
-
-        @media(max-width:700px) {
-            .dashboard {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .goal-banner {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .goal-banner .progress-ring {
-                justify-content: space-between;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
-    </style>
+/* ── FOOTER ── */
+.footer {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 32px;
+  font-size: 11px;
+  color: var(--dim);
+  font-family: var(--mono);
+  text-align: center;
+}
+</style>
 </head>
 <body>
-    <div class="container">
+<div class="container">
 
-        <!-- GOAL BANNER -->
-        <div class="goal-banner">
-            <div class="left">
-                <span class="badge">🎯 PTE 55+</span>
-                <span class="exam-date">Thi: <strong>20/07/2026</strong></span>
-                <span class="days-left" id="bannerDaysLeft">—</span>
-            </div>
-            <div class="progress-ring">
-                <div>
-                    <div class="ring-label">PTE 55+ Progress</div>
-                    <div class="ring-value" id="progressPct">0%</div>
-                </div>
-                <div style="text-align:center">
-                    <div class="ring-label">Prediction</div>
-                    <div class="ring-value" id="bannerPrediction" style="font-size:20px">—</div>
-                </div>
-                <div style="text-align:center">
-                    <div class="ring-label">Target</div>
-                    <div class="ring-value" style="font-size:20px;color:var(--muted)">55</div>
-                </div>
-            </div>
-        </div>
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-top">
+    <div class="title-block">
+      <h1>PTE <span>55+</span> — 8 NGÀY CUỐI</h1>
+      <div class="sub">Final Sprint Roadmap · Thi: 20/07/2026 · Build từ data thực tế của bạn</div>
+    </div>
+    <div class="countdown-box">
+      <div class="num" id="daysLeft">8</div>
+      <div class="lbl">ngày còn lại</div>
+    </div>
+  </div>
+</div>
 
-        <h1>📘 PTE 55+ MASTER TRACKER <span style="font-size:13px;color:var(--muted);font-weight:400">v8 — 14 tasks</span></h1>
-        <div class="subtitle">PTE Academic · Mục tiêu 55+ · Hôm nay: <span id="todayLabel">—</span></div>
+<!-- ── ALERT ── -->
+<div class="alert">
+  <div class="alert-icon">⚡</div>
+  <div>
+    <strong>Tình hình:</strong> Prediction hiện tại <strong>47.7</strong> — còn thiếu <strong>7.3 điểm</strong> để đạt 55.
+    Với 8 ngày còn lại, không có thời gian học kỹ năng mới — chỉ cần <strong>tăng accuracy trên task đang gần target</strong>.
+    FDD +19% và WE +14% là quá xa để sprint — tập trung vào <strong>SGD, SST, FIL, RS, WFD</strong> để đẩy prediction.
+    <br><br>
+    <strong>Read Aloud:</strong> Vì bạn không thể đạt 8.5/15+ một cách ổn định, lộ trình này chuyển RA sang chế độ
+    <strong>"sàn bảo vệ"</strong> — chỉ cần giữ 7/15 đều đặn để không mất điểm, không lãng phí thêm thời gian push lên cao.
+  </div>
+</div>
 
-        <!-- FILTER -->
-        <div class="filter-bar">
-            <button class="filter-btn active" data-range="today">📅 Hôm nay</button>
-            <button class="filter-btn" data-range="7days">📆 7 ngày</button>
-            <button class="filter-btn" data-range="all">🗂 Tất cả</button>
-        </div>
+<!-- ── CURRENT SCORES ── -->
+<div class="section">
+  <div class="section-title"><h2>📊 Điểm hiện tại của bạn</h2><span class="tag tag-blue">từ screenshot thực tế</span></div>
+  <div class="scores-grid">
+    <div class="score-card urgent">
+      <div class="label">FDD</div>
+      <div class="val c-red">35.7%</div>
+      <div class="gap-tag c-red">Gap: -19.3% ← TOO FAR</div>
+    </div>
+    <div class="score-card urgent">
+      <div class="label">WE</div>
+      <div class="val c-red">45.8%</div>
+      <div class="gap-tag c-red">Gap: -14.2% ← TOO FAR</div>
+    </div>
+    <div class="score-card urgent">
+      <div class="label">SGD</div>
+      <div class="val c-orange">42.3%</div>
+      <div class="gap-tag c-orange">Gap: -7.7% ← SPRINT</div>
+    </div>
+    <div class="score-card warn">
+      <div class="label">SST</div>
+      <div class="val c-yellow">46.7%</div>
+      <div class="gap-tag c-yellow">Gap: -8.3% ← SPRINT</div>
+    </div>
+    <div class="score-card warn">
+      <div class="label">WFD</div>
+      <div class="val c-yellow">51.2%</div>
+      <div class="gap-tag c-yellow">Gap: -3.8% ← SPRINT</div>
+    </div>
+    <div class="score-card warn">
+      <div class="label">RS</div>
+      <div class="val c-yellow">57.9%</div>
+      <div class="gap-tag c-yellow">Gap: +2.9% → MAINTAIN</div>
+    </div>
+    <div class="score-card warn">
+      <div class="label">FIL</div>
+      <div class="val c-yellow">54.8%</div>
+      <div class="gap-tag c-yellow">Gap: -0.2% ← SPRINT</div>
+    </div>
+    <div class="score-card warn">
+      <div class="label">FIB</div>
+      <div class="val c-yellow">50.0%</div>
+      <div class="gap-tag c-yellow">Gap: -5.0% ← SPRINT</div>
+    </div>
+    <div class="score-card ok">
+      <div class="label">DI</div>
+      <div class="val c-green">64.7%</div>
+      <div class="gap-tag c-green">Gap: +9.7% → REST</div>
+    </div>
+    <div class="score-card ok">
+      <div class="label">SWT</div>
+      <div class="val c-green">66.9%</div>
+      <div class="gap-tag c-green">Gap: +6.9% → REST</div>
+    </div>
+    <div class="score-card ok">
+      <div class="label">RTS</div>
+      <div class="val c-green">54.6%</div>
+      <div class="gap-tag c-green">Gap: +4.6% → MAINTAIN</div>
+    </div>
+    <div class="score-card ok">
+      <div class="label">SMW</div>
+      <div class="val c-green">60.0%</div>
+      <div class="gap-tag c-green">Gap: +10% → REST</div>
+    </div>
+    <div class="score-card ok">
+      <div class="label">RL</div>
+      <div class="val c-blue">45.9%</div>
+      <div class="gap-tag c-blue">Gap: +0.9% → HOLD</div>
+    </div>
+    <div class="score-card" style="border-color:var(--blue)">
+      <div class="label">RA (new method)</div>
+      <div class="val c-blue">57.0%</div>
+      <div class="gap-tag c-blue">→ Giữ sàn 7/15</div>
+    </div>
+  </div>
+</div>
 
-        <!-- DASHBOARD -->
-        <div class="dashboard" id="dashGrid">
-            <div class="dash-card">
-                <div class="label">Ngày còn lại</div>
-                <div class="value" id="daysLeft">—</div>
-            </div>
-            <div class="dash-card">
-                <div class="label">PTE Prediction</div>
-                <div class="value" id="dashPrediction">—</div>
-                <div class="pred-bar-wrap">
-                    <div class="pred-labels"><span>0</span><span>55</span><span>90</span></div>
-                    <div class="pred-bar-bg">
-                        <div class="pred-bar-fill" id="predBar" style="width:0%;background:var(--red)"></div>
-                        <div class="pred-bar-target"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="dash-card">
-                <div class="label">Raw Accuracy</div>
-                <div class="value" id="dashRawAcc">—</div>
-            </div>
-            <div class="dash-card">
-                <div class="label">Streak</div>
-                <div class="value" id="dashStreak">0 🔥</div>
-            </div>
-            <div class="dash-card">
-                <div class="label">Speaking</div>
-                <div class="value" id="dashSpeaking">—</div>
-            </div>
-            <div class="dash-card">
-                <div class="label">Writing</div>
-                <div class="value" id="dashWriting">—</div>
-            </div>
-            <div class="dash-card">
-                <div class="label">Reading</div>
-                <div class="value" id="dashReading">—</div>
-            </div>
-            <div class="dash-card">
-                <div class="label">Listening</div>
-                <div class="value" id="dashListening">—</div>
-            </div>
-        </div>
+<!-- ── RA NEW METHOD ── -->
+<div class="section">
+  <div class="section-title">
+    <h2>🎙️ Read Aloud — Đổi chiến thuật</h2>
+    <span class="tag tag-blue">không push lên cao nữa</span>
+  </div>
+  <div class="ra-note">
+    <h3>Vì sao đổi cách tính?</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+      RA tính theo <strong>Content + Pronunciation + Fluency</strong> — không phải đơn giản là số câu đúng/tổng.
+      Nếu bạn không thể ổn định trên 8.5/15, có nghĩa Pronunciation hoặc Fluency đang kéo điểm xuống.
+      8 ngày không đủ để fix accent/intonation sâu — vì vậy chuyển sang chiến lược phòng thủ.
+    </p>
+    <div class="ra-note-grid">
+      <div class="ra-method">
+        <div class="method-label">❌ Cách cũ — bỏ ngay</div>
+        <div class="method-name">Push accuracy %</div>
+        <ul>
+          <li>Cố đọc đúng từng từ → run lỗi khi nervous</li>
+          <li>Luyện nhiều bài → không nhớ pattern</li>
+          <li>Target 65% → không thực tế với 8 ngày</li>
+        </ul>
+        <div class="ra-old">Target cũ: 65% accuracy</div>
+      </div>
+      <div class="ra-method">
+        <div class="method-label">✅ Cách mới — áp dụng ngay</div>
+        <div class="method-name">Sàn bảo vệ: 7/15 ổn định</div>
+        <ul>
+          <li><strong>Fluency ưu tiên hơn accuracy</strong> — đọc trơn tru dù có lỗi nhỏ</li>
+          <li>Mỗi ngày chỉ luyện <strong>5–6 bài RA</strong>, không cần nhiều hơn</li>
+          <li>Template mở đầu: hít thở, dừng 1 giây, đọc với pace đều</li>
+          <li>Không dừng giữa chừng — fluency score cao hơn khi đọc liên tục</li>
+          <li><strong>Metric mới: đếm lần đọc không dừng</strong>, không đếm % đúng</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- BUTTONS -->
-        <div class="btn-row">
-            <button id="exportJSON">⬇ Export JSON</button>
-            <button id="importJSON">⬆ Import JSON</button>
-            <button id="exportCSV">📊 Export CSV</button>
-            <button id="resetAll" class="danger">🗑 Reset All</button>
-            <input type="file" id="importFile" accept=".json" style="display:none">
-        </div>
+<!-- ── SCORE PROJECTION ── -->
+<div class="section">
+  <div class="section-title"><h2>📈 Dự báo điểm sau 8 ngày</h2><span class="tag tag-blue">dựa trên data thực tế</span></div>
+  <div class="projection">
+    <div class="proj-title">Nếu bạn thực hiện đúng lộ trình dưới đây:</div>
+    <div class="proj-scenarios">
+      <div class="proj-scenario pessimist">
+        <div class="scenario-name">Thực hiện 60%</div>
+        <div class="score">51–53</div>
+        <div class="condition">Bỏ vài ngày, không tập trung SGD/SST đủ</div>
+      </div>
+      <div class="proj-scenario realistic">
+        <div class="scenario-name">🎯 Thực tế nhất</div>
+        <div class="score">55–57</div>
+        <div class="condition">Sprint SGD+SST+FIL+WFD đều đặn 7 ngày, RS maintain, RA giữ sàn</div>
+      </div>
+      <div class="proj-scenario optimist">
+        <div class="scenario-name">Nếu bứt phá</div>
+        <div class="score">58–60</div>
+        <div class="condition">SGD lên 55%+, FIB lên 60%+, WFD lên 60%+</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- === GOAL TRACKER === -->
-        <div class="section" id="goalTrackerSection">
-            <h2>🎯 Goal Tracker — <span id="goalRangeLabel">Hôm nay</span></h2>
-            <div id="goalTrackerGrid" class="goal-tracker-grid"></div>
-        </div>
+<!-- ── 8 DAY PLAN ── -->
+<div class="section">
+  <div class="section-title">
+    <h2>📅 Lịch 8 ngày chi tiết</h2>
+    <span class="tag tag-red">tính từ hôm nay 12/07</span>
+  </div>
+  <div class="days-grid" id="daysGrid"></div>
+</div>
 
-        <!-- PRIORITY DASHBOARD -->
-        <div class="section">
-            <h2>🚨 Priority Dashboard — <span id="priorityRangeLabel">Hôm nay</span></h2>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:12px">INTENSIVE = cần tập trung ngay · FOCUS = duy trì · MAINTAIN = giữ vững · REST = giảm tải</p>
-            <div id="priorityGrid" class="priority-grid"></div>
-        </div>
+<!-- ── STRATEGY ── -->
+<div class="section">
+  <div class="section-title"><h2>🧠 Chiến lược task cụ thể</h2><span class="tag tag-blue">dành cho 8 ngày sprint</span></div>
+  <div class="strategy-grid">
 
-        <!-- TASK KPI GRID -->
-        <div class="section">
-            <h2>📊 Task KPI — <span id="rangeLabel">Hôm nay</span></h2>
-            <div id="kpiGrid" class="kpi-grid"></div>
-        </div>
-
-        <!-- SKILL BREAKDOWN -->
-        <div class="section">
-            <h2>📊 Skill Breakdown</h2>
-            <div id="skillBreakdown" class="skill-breakdown"></div>
-        </div>
-
-        <!-- ADAPTIVE STUDY PLAN -->
-        <div class="section">
-            <h2>📋 Adaptive Study Plan — Tuần này</h2>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Số bài được phân bổ tự động theo thời gian thực tế, ưu tiên task yếu.</p>
-            <div class="adapt-legend">
-                <span><span style="color:var(--red)">🔴</span> INTENSIVE — tăng cường</span>
-                <span><span style="color:var(--yellow)">🟡</span> FOCUS — duy trì đều</span>
-                <span><span style="color:var(--green)">⭐</span> Daily — làm mỗi ngày</span>
-                <span><span style="color:var(--muted);text-decoration:line-through">strikethrough</span> — REST, giảm tải</span>
-                <span><span style="color:var(--accent)">📍</span> Hôm nay</span>
-            </div>
-            <div id="studyPlan" class="plan-wrap"></div>
-        </div>
-
-        <!-- TASKS -->
-        <div class="section">
-            <h2>📝 14 Tasks — nhập từng bài theo ngày</h2>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:10px">🚨 INTENSIVE (viền đỏ) · 💤 REST (mờ, giảm tải) · Nhập dạng <strong>số/số</strong> ví dụ: <strong>9.8/13</strong> hoặc <strong>18/24</strong></p>
-            <div id="taskContainer" class="task-grid"></div>
-        </div>
-
-        <!-- HISTORY -->
-        <div class="section">
-            <h2>📊 Lịch sử & Phân tích</h2>
-            <div class="tabs">
-                <div class="tab active" data-tab="chart">📈 Biểu đồ</div>
-                <div class="tab" data-tab="table">📋 Bảng ngày</div>
-                <div class="tab" data-tab="weekly">📅 Báo cáo tuần</div>
-                <div class="tab" data-tab="streak">🔥 Streak</div>
-            </div>
-            <div id="tab-chart">
-                <canvas id="accChart" height="70"></canvas><br>
-                <canvas id="predChart" height="70"></canvas><br>
-                <canvas id="radarChart" height="70"></canvas>
-            </div>
-            <div id="tab-table" style="display:none">
-                <table class="history-table"><thead><tr><th>Ngày</th><th>Acc hôm đó</th><th>PTE Prediction</th><th>Acc tích lũy</th><th>Số bài</th></tr></thead><tbody id="historyBody"></tbody></table>
-            </div>
-            <div id="tab-weekly" style="display:none"><div id="weeklyReport"></div></div>
-            <div id="tab-streak" style="display:none"><div id="streakPanel"></div></div>
-        </div>
-
+    <div class="strategy-card" style="border-color:var(--orange)">
+      <h3><span>🔴</span> SGD — Tóm tắt nhóm (9%)</h3>
+      <ul>
+        <li><span class="bullet">→</span> Cứ 2h luyện SGD ít nhất 2–3 bài, không ít hơn</li>
+        <li><span class="bullet">→</span> Template cứng: <em>"The discussion focused on… The first speaker argued… Another perspective was… In conclusion…"</em></li>
+        <li><span class="bullet">→</span> Không cần dùng hết 90 giây — 60–70s đủ nếu trơn tru</li>
+        <li><span class="bullet">→</span> Luyện nghe 10s đầu và 10s cuối của audio — cấu trúc bài hay nằm ở đó</li>
+        <li><span class="bullet">→</span> Target 8 ngày: từ 42% → 52%+</li>
+      </ul>
     </div>
 
-    <script>
-        // ═══════════════════════════════════════════════════════════════════
-        //  TASK DEFINITIONS — 14 tasks (PTE 55+)
-        // ═══════════════════════════════════════════════════════════════════
-        const TASKS = [
-            ["RA", "Read Aloud", "Đọc thành tiếng", 4, "speaking", [1, 0]],
-            ["RS", "Repeat Sentence", "Nhắc lại câu", 7, "speaking", [1, 2, 3, 4, 5, 6, 0]],
-            ["DI", "Describe Image", "Mô tả hình ảnh", 15, "speaking", [1]],
-            ["RL", "Retell Lecture", "Kể lại bài giảng", 6, "speaking", [1]],
-            ["SGD", "Summarise Group Discussion", "Tóm tắt thảo luận nhóm", 9, "speaking", [2]],
-            ["RTS", "Respond to a Situation", "Phản hồi tình huống", 6, "speaking", [2]],
-            ["SWT", "Summarize Written Text", "Tóm tắt văn bản viết", 7, "writing", [3]],
-            ["WE", "Write Essay", "Viết luận", 7, "writing", [3]],
-            ["FIB", "FIB – Dropdown", "Điền từ (dropdown)", 7, "reading", [3, 4]],
-            ["FDD", "FIB – Drag & Drop", "Kéo thả điền từ", 6, "reading", [4]],
-            ["SST", "Summarize Spoken Text", "Tóm tắt bài nghe", 4, "listening", [5]],
-            ["FIL", "Fill In The Blanks", "Điền từ bài nghe", 3, "listening", [6]],
-            ["SMW", "Select Missing Word", "Chọn từ còn thiếu", 1, "listening", [6]],
-            ["WFD", "Write from Dictation", "Nghe và viết lại", 5, "listening", [1, 2, 3, 4, 5, 6, 0]],
-        ];
-
-        // ── KPI TARGETS ──
-        const KPI_TARGETS = {
-            RA: 65,
-            RS: 55,
-            DI: 55,
-            RL: 45,
-            SGD: 50,
-            RTS: 50,
-            SWT: 60,
-            WE: 60,
-            FIB: 55,
-            FDD: 55,
-            SST: 55,
-            FIL: 55,
-            SMW: 50,
-            WFD: 55
-        };
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  FIX #2: SKILL TARGETS — dynamic per skill
-        // ═══════════════════════════════════════════════════════════════════
-        const SKILL_TARGETS = {
-            speaking: 55,
-            writing: 60,
-            reading: 55,
-            listening: 55
-        };
-
-        // ── SKILL CONTRIBUTIONS ──
-        const SKILL_CONTRIB = {
-            RA: { speaking: 9 },
-            RS: { speaking: 16, listening: 17 },
-            DI: { speaking: 31 },
-            RL: { speaking: 13, listening: 13 },
-            SGD: { speaking: 19, listening: 20 },
-            RTS: { speaking: 13 },
-            SWT: { writing: 28, reading: 23 },
-            WE: { writing: 31 },
-            FIB: { reading: 25 },
-            FDD: { reading: 20 },
-            SST: { writing: 18, listening: 10 },
-            FIL: { listening: 8 },
-            SMW: { listening: 1 },
-            WFD: { writing: 23, listening: 13 },
-        };
-
-        const DAILY_TASKS = ["RS", "WFD"];
-
-        // Budget PTE thực tế sau khi trừ lịch học trên trường:
-        // T2=10h, T3=5h (trường 12:50-16:00), T4=2h (trường 12:50-17:40, học sáng/tối)
-        // T5=10h, T6=2h (trường 12:50-17:40), T7=10h, CN=10h
-        const DOW_HOURS = { 1: 10, 2: 5, 3: 2, 4: 10, 5: 2, 6: 10, 0: 10 };
-
-        const MIN_PER_REP = {
-            RA: 1.5,
-            RS: 1.5,
-            DI: 2,
-            RL: 2.5,
-            SGD: 3,
-            RTS: 2,
-            SWT: 10,
-            WE: 20,
-            FIB: 2,
-            FDD: 2.5,
-            SST: 10,
-            FIL: 2,
-            SMW: 1.5,
-            WFD: 3,
-        };
-
-        // Cap số bài tối đa mỗi ngày — trung bình 15-20 bài/task
-        // Task dài (WE=20ph, SWT=10ph, SST=10ph) giữ cap thấp vì tốn thời gian
-        const MAX_REPS_OVERRIDE = {
-            WE: 2,
-            SWT: 3,
-            SST: 2,
-            RL: 10,
-            SGD: 10,
-            DI: 15,
-            RTS: 15,
-            FDD: 15,
-            SMW: 15,
-            RA: 20,
-            RS: 15,  // daily — giữ 15 để không ngán, còn sức task chính
-            FIB: 20,
-            FIL: 20,
-            WFD: 15, // daily — giữ 15
-        };
-
-        function capFor(id) { return MAX_REPS_OVERRIDE[id] || 12; }
-
-        const WEEK_PLAN = [
-            // Phân bổ 14 tasks đủ full tuần, RS+WFD daily mỗi ngày
-            // T2(10h): Speaking nặng — DI(15%), RL(6%), RA(4%)
-            { dow: 1, name: "Thứ 2", tasks: ["DI", "RL", "RA", "RS", "WFD"], note: "Speaking nặng · 10h" },
-            // T3(5h): Speaking nhóm — SGD(9%), RTS(6%)
-            { dow: 2, name: "Thứ 3", tasks: ["SGD", "RTS", "RS", "WFD"], note: "Speaking nhóm · 5h (trường chiều)" },
-            // T4(2h): Writing — SWT(7%), chỉ 2h nên 1 task chính
-            { dow: 3, name: "Thứ 4", tasks: ["SWT", "RS", "WFD"], note: "Writing · 2h (trường chiều)" },
-            // T5(10h): Reading + Writing — FIB(7%), FDD(6%), WE(7%)
-            { dow: 4, name: "Thứ 5", tasks: ["FIB", "FDD", "WE", "RS", "WFD"], note: "Reading + Writing · 10h" },
-            // T6(2h): Listening — SST(4%), chỉ 2h nên 1 task chính
-            { dow: 5, name: "Thứ 6", tasks: ["SST", "RS", "WFD"], note: "Listening · 2h (trường chiều)" },
-            // T7(10h): Listening đầy đủ — FIL(3%), SMW(1%), + ôn RA
-            { dow: 6, name: "Thứ 7", tasks: ["FIL", "SMW", "RA", "RS", "WFD"], note: "Listening + RA · 10h" },
-            // CN(10h): Ôn tổng hợp — SGD bổ sung, DI luyện thêm, RL
-            { dow: 0, name: "CN", tasks: ["DI", "RL", "SGD", "SWT", "RS", "WFD"], note: "Ôn tổng hợp · 10h" },
-        ];
-
-        const EXAM_DATE = new Date("2026-07-20");
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  STORAGE
-        // ═══════════════════════════════════════════════════════════════════
-        function loadData() { try { return JSON.parse(localStorage.getItem("pte_v8") || "{}"); } catch { return {}; } }
-
-        function saveData() { localStorage.setItem("pte_v8", JSON.stringify(DATA)); }
-
-        const DATA = loadData();
-        if (!DATA.__history) DATA.__history = [];
-        if (!DATA.__daily) DATA.__daily = {};
-        if (!DATA.__trend) DATA.__trend = {};
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  HELPERS
-        // ═══════════════════════════════════════════════════════════════════
-        function getToday() {
-            const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-        }
-        const TODAY = getToday();
-        const TODAY_DOW = new Date().getDay();
-
-        function fmtDate(s) { const [, m, d] = s.split("-"); return `${d}/${m}`; }
-
-        function daysUntilExam() { return Math.ceil((EXAM_DATE - new Date()) / 86400000); }
-
-        function parseScore(v) {
-            const m = (v || "").trim().match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
-            return m ? { raw: +m[1], max: +m[2] } : null;
-        }
-
-        function calcEntries(arr) {
-            let raw = 0,
-                max = 0,
-                cnt = 0;
-            (arr || []).forEach(v => { const p = parseScore(v); if (p && p.max > 0) { raw += p.raw;
-                    max += p.max;
-                    cnt++; } });
-            return { raw, max, cnt, pct: max > 0 ? (raw / max) * 100 : 0 };
-        }
-
-        function calcTaskAccOverDays(id, dayList) {
-            let raw = 0,
-                max = 0,
-                cnt = 0;
-            dayList.forEach(d => {
-                const c = calcEntries(DATA.__daily[d]?.[id] || []);
-                raw += c.raw;
-                max += c.max;
-                cnt += c.cnt;
-            });
-            return { raw, max, cnt, pct: max > 0 ? (raw / max) * 100 : 0 };
-        }
-
-        function calcDayAcc(day) {
-            let raw = 0,
-                max = 0;
-            Object.values(DATA.__daily[day] || {}).forEach(arr => {
-                const c = calcEntries(arr);
-                raw += c.raw;
-                max += c.max;
-            });
-            return { raw, max, pct: max > 0 ? (raw / max) * 100 : 0 };
-        }
-
-        function getAllDays() {
-            const keys = Object.keys(DATA.__daily).sort().reverse();
-            if (!keys.includes(TODAY)) keys.unshift(TODAY);
-            return keys;
-        }
-
-        function getDaysInRange(range) {
-            const all = getAllDays();
-            if (range === "today") return [TODAY];
-            if (range === "7days") {
-                const cutoff = new Date(TODAY);
-                cutoff.setDate(cutoff.getDate() - 6);
-                const cutStr = cutoff.toISOString().slice(0, 10);
-                return all.filter(d => d >= cutStr);
-            }
-            return all;
-        }
-
-        function scoreClass(pct) { return pct <= 0 ? "empty" : pct >= 70 ? "good" : pct >= 50 ? "warn" : "bad"; }
-
-        function weightClass(w) { return w >= 10 ? "high" : w >= 4 ? "mid" : "low"; }
-
-        function esc(s) { return s.replace(/[^a-zA-Z0-9]/g, "_"); }
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  FIX #1: Goal Status function
-        // ═══════════════════════════════════════════════════════════════════
-        function getGoalStatus(current, target) {
-            if (current < target - 10) return "Need Work";
-            if (current < target) return "Almost There";
-            if (current >= target + 10) return "Mastered";
-            return "Achieved";
-        }
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  FIX #3: PREDICTION = weightedPercent * 0.9 (capped at 90)
-        // ═══════════════════════════════════════════════════════════════════
-        function calcPrediction(dayList) {
-            let weightedSum = 0,
-                totalWeight = 0,
-                hasData = false;
-            TASKS.forEach(([id, , , w]) => {
-                const c = calcTaskAccOverDays(id, dayList);
-                if (c.max > 0) { weightedSum += (c.pct / 100) * w;
-                    hasData = true; }
-                totalWeight += w;
-            });
-            if (!hasData) return null;
-            const weightedPct = totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0;
-            // ✅ CORRECT: weightedPercent * 0.9, cap at 90
-            return Math.min(90, weightedPct * 0.9);
-        }
-
-        // ── SKILL SCORE ──
-        function calcSkillScore(skill, dayList) {
-            let wSum = 0,
-                totalContrib = 0,
-                hasData = false;
-            TASKS.forEach(([id]) => {
-                const contrib = SKILL_CONTRIB[id]?.[skill];
-                if (!contrib) return;
-                totalContrib += contrib;
-                const c = calcTaskAccOverDays(id, dayList);
-                if (c.max > 0) { wSum += (c.pct / 100) * contrib;
-                    hasData = true; }
-            });
-            if (totalContrib === 0 || !hasData) return null;
-            return (wSum / totalContrib) * 90;
-        }
-
-        function calcRawAccOverDays(dayList) {
-            let raw = 0,
-                max = 0,
-                cnt = 0;
-            dayList.forEach(d => {
-                Object.values(DATA.__daily[d] || {}).forEach(arr => {
-                    const c = calcEntries(arr);
-                    raw += c.raw;
-                    max += c.max;
-                    cnt += c.cnt;
-                });
-            });
-            return { raw, max, cnt, pct: max > 0 ? (raw / max) * 100 : 0 };
-        }
-
-        function calcStreak() {
-            let s = 0;
-            for (let i = 0; i < 90; i++) {
-                const d = new Date(TODAY);
-                d.setDate(d.getDate() - i);
-                const k = d.toISOString().slice(0, 10);
-                const a = calcDayAcc(k);
-                if (a.max > 0) s++;
-                else if (i > 0) break;
-            }
-            return s;
-        }
-
-        function getTaskTrend(id) {
-            const days = [];
-            for (let i = 1; i <= 3; i++) {
-                const d = new Date(TODAY);
-                d.setDate(d.getDate() - i);
-                const k = d.toISOString().slice(0, 10);
-                const c = calcEntries(DATA.__daily[k]?.[id] || []);
-                if (c.max > 0) days.push(c.pct);
-            }
-            if (days.length < 3) return null;
-            const target = KPI_TARGETS[id] || 55;
-            const above = days.every(p => p >= target + 5);
-            const below = days.every(p => p < target);
-            if (above) return "above";
-            if (below) return "below";
-            return "stable";
-        }
-
-        function getAdaptiveStatus(dayList) {
-            const status = {};
-            TASKS.forEach(([id, , , w]) => {
-                const c = calcTaskAccOverDays(id, dayList);
-                const target = KPI_TARGETS[id] || 55;
-                const hasData = c.max > 0;
-                const acc = hasData ? c.pct : null;
-                const gap = hasData ? target - acc : target;
-                let st = "UNKNOWN";
-                if (hasData) {
-                    if (acc >= target + 5) st = "REST";
-                    else if (acc >= target) st = "MAINTAIN";
-                    else if (acc >= target - 10) st = "FOCUS";
-                    else st = "INTENSIVE";
-                }
-                const urgency = gap * (w / 10);
-                let action = "";
-                if (st === "INTENSIVE") action = `Tăng cường +${Math.min(4, Math.ceil(gap/15))} set/ngày`;
-                else if (st === "FOCUS") action = "Duy trì ít nhất 1 set/ngày";
-                else if (st === "MAINTAIN") action = "1 set mỗi 2 ngày";
-                else if (st === "REST") action = "Giảm còn 1 set cuối tuần";
-                else action = "Cần dữ liệu";
-
-                const trend = getTaskTrend(id);
-                let loadAdj = 0;
-                if (trend === "above") loadAdj = -0.2;
-                else if (trend === "below") loadAdj = 0.1;
-
-                status[id] = { status: st, urgency, acc, target, gap: Math.max(0, gap), weight: w, action, hasData,
-                    trend, loadAdj };
-            });
-            return status;
-        }
-
-        function getAdaptivePlan(adaptStatus) {
-            // Map skill → ngày phù hợp để inject task INTENSIVE
-            const skillDayMap = {
-                speaking:  [1, 2],
-                writing:   [3],
-                reading:   [3, 4],
-                listening: [5, 6],
-                mixed:     [0],
-            };
-            return WEEK_PLAN.map(day => {
-                const base = [...day.tasks];
-                // Chỉ inject INTENSIVE task nếu:
-                //  1. Task đó có data thật (hasData) — tránh inject khi chưa nhập gì
-                //  2. Ngày này đúng với skill của task
-                const criticals = Object.entries(adaptStatus)
-                    .filter(([id, s]) => {
-                        if (s.status !== "INTENSIVE") return false;
-                        if (base.includes(id)) return false;
-                        if (DAILY_TASKS.includes(id)) return false;
-                        if (!s.hasData) return false; // không inject khi chưa có data
-                        const task = TASKS.find(t => t[0] === id);
-                        if (!task) return false;
-                        const allowedDays = skillDayMap[task[4]] || task[5];
-                        return allowedDays.includes(day.dow);
-                    })
-                    .sort((a, b) => b[1].urgency - a[1].urgency)
-                    .slice(0, 2)
-                    .map(([id]) => id);
-                const finalTasks = [...new Set([...base, ...criticals])];
-
-                const budgetMin = (DOW_HOURS[day.dow] || 4) * 60;
-                const reduced = finalTasks.filter(id => adaptStatus[id]?.status === "REST");
-                const active = finalTasks.filter(id => !reduced.includes(id));
-
-                const reps = {};
-                finalTasks.forEach(id => reps[id] = 0);
-                reduced.forEach(id => reps[id] = 0);
-                active.forEach(id => reps[id] = 1);
-
-                const minPer = id => MIN_PER_REP[id] || 5;
-                let used = active.reduce((s, id) => s + minPer(id), 0);
-
-                active.forEach(id => {
-                    const adj = adaptStatus[id]?.loadAdj || 0;
-                    if (adj !== 0) {
-                        const baseRep = reps[id];
-                        let newRep = Math.round(baseRep * (1 + adj));
-                        newRep = Math.max(1, Math.min(capFor(id), newRep));
-                        const diff = newRep - baseRep;
-                        if (diff > 0 && used + diff * minPer(id) <= budgetMin) {
-                            reps[id] = newRep;
-                            used += diff * minPer(id);
-                        } else if (diff < 0) {
-                            reps[id] = newRep;
-                            used += diff * minPer(id);
-                        }
-                    }
-                });
-
-                let guard = 0;
-                while (used < budgetMin && guard < 500) {
-                    guard++;
-                    const candidates = active.filter(id => reps[id] < capFor(id));
-                    if (candidates.length === 0) break;
-                    candidates.sort((a, b) => {
-                        const ua = (adaptStatus[a]?.urgency || 1) / (reps[a] + 1);
-                        const ub = (adaptStatus[b]?.urgency || 1) / (reps[b] + 1);
-                        return ub - ua;
-                    });
-                    const pick = candidates[0];
-                    if (used + minPer(pick) > budgetMin) break;
-                    reps[pick]++;
-                    used += minPer(pick);
-                }
-
-                const leftoverMin = Math.max(0, budgetMin - used);
-                const leftoverNote = (leftoverMin >= 60) ?
-                    `Còn dư ~${(leftoverMin/60).toFixed(1)}h — ôn lại lỗi sai hoặc tăng thêm số bài` :
-                    null;
-
-                // Check if any task has real data
-                const anyData = finalTasks.some(id => {
-                    const allDays = getAllDays();
-                    return allDays.some(d => (DATA.__daily[d]?.[id] || []).some(v => parseScore(v)));
-                });
-                const noDataNote = !anyData ? "Nhập điểm để kích hoạt Adaptive Plan — số bài sẽ tự điều chỉnh theo điểm thực tế" : null;
-
-                return {
-                    ...day,
-                    tasks: finalTasks,
-                    budgetMin,
-                    usedMin: used,
-                    leftoverMin,
-                    leftoverNote,
-                    noDataNote,
-                    taskMeta: finalTasks.map(id => ({
-                        id,
-                        isDaily: DAILY_TASKS.includes(id),
-                        isBoosted: criticals.includes(id),
-                        isReduced: adaptStatus[id]?.status === "REST",
-                        status: adaptStatus[id]?.status || "UNKNOWN",
-                        reps: reps[id],
-                    }))
-                };
-            });
-        }
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  STATE
-        // ═══════════════════════════════════════════════════════════════════
-        let currentRange = "today";
-        if (!DATA.__daily[TODAY]) DATA.__daily[TODAY] = {};
-        saveData();
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  RENDER
-        // ═══════════════════════════════════════════════════════════════════
-        function renderAll() {
-            const rangeLabels = { today: "Hôm nay", "7days": "7 ngày qua", all: "Tất cả" };
-            document.getElementById("rangeLabel").textContent = rangeLabels[currentRange];
-            document.getElementById("priorityRangeLabel").textContent = rangeLabels[currentRange];
-            document.getElementById("goalRangeLabel").textContent = rangeLabels[currentRange];
-            document.getElementById("todayLabel").textContent = fmtDate(TODAY);
-
-            const daysLeft = daysUntilExam();
-            document.getElementById("daysLeft").textContent = daysLeft;
-            document.getElementById("bannerDaysLeft").textContent = `Còn ${daysLeft} ngày`;
-
-            const days = getDaysInRange(currentRange);
-            const rawAcc = calcRawAccOverDays(days);
-            const pred = calcPrediction(days);
-            const streak = calcStreak();
-
-            // Banner
-            const progress = pred !== null ? Math.min(100, (pred / 55) * 100) : 0;
-            document.getElementById("progressPct").textContent = Math.round(progress) + "%";
-            document.getElementById("bannerPrediction").textContent = pred !== null ? pred.toFixed(1) : "—";
-            const predCls = pred !== null ? (pred >= 55 ? "good" : pred >= 40 ? "warn" : "bad") : "";
-            document.getElementById("bannerPrediction").className = `ring-value ${predCls}`;
-
-            // Dashboard
-            const dPredCls = pred !== null ? (pred >= 55 ? "good" : pred >= 40 ? "warn" : "bad") : "";
-            document.getElementById("dashPrediction").textContent = pred !== null ? pred.toFixed(1) : "—";
-            document.getElementById("dashPrediction").className = `value ${dPredCls}`;
-            const barPct = pred !== null ? Math.min(100, (pred / 90) * 100) : 0;
-            document.getElementById("predBar").style.width = barPct + "%";
-            document.getElementById("predBar").style.background = pred !== null ? (pred >= 55 ? "var(--green)" : pred >= 40 ?
-                "var(--yellow)" : "var(--red)") : "var(--muted)";
-
-            document.getElementById("dashRawAcc").textContent = rawAcc.max > 0 ? rawAcc.pct.toFixed(1) + "%" : "—";
-            document.getElementById("dashRawAcc").className = `value ${scoreClass(rawAcc.pct)}`;
-            document.getElementById("dashStreak").textContent = `${streak} 🔥`;
-
-            ["speaking", "writing", "reading", "listening"].forEach(sk => {
-                const sc = calcSkillScore(sk, days);
-                const el = document.getElementById("dash" + sk.charAt(0).toUpperCase() + sk.slice(1));
-                if (el) {
-                    el.textContent = sc !== null ? sc.toFixed(1) : "—";
-                    el.className = `value ${sc !== null ? (sc >= 55 ? "good" : sc >= 40 ? "warn" : "bad") : ""}`;
-                }
-            });
-
-            // ── Goal Tracker ──
-            renderGoalTracker(pred);
-
-            // Save history
-            const allDays = getAllDays();
-            const allAcc = calcRawAccOverDays(allDays);
-            const allPred = calcPrediction(allDays);
-            const todayAcc = calcDayAcc(TODAY);
-            const snap = DATA.__history.find(x => x.date === TODAY);
-            const entry = {
-                date: TODAY,
-                todayAcc: todayAcc.pct,
-                allAcc: allAcc.pct,
-                weightedPred: allPred,
-                skillSpeaking: calcSkillScore("speaking", allDays) || 0,
-                skillWriting: calcSkillScore("writing", allDays) || 0,
-                skillReading: calcSkillScore("reading", allDays) || 0,
-                skillListening: calcSkillScore("listening", allDays) || 0,
-            };
-            if (snap) Object.assign(snap, entry);
-            else DATA.__history.push(entry);
-            DATA.__history.sort((a, b) => a.date.localeCompare(b.date));
-            saveData();
-
-            const adaptStatus = getAdaptiveStatus(days);
-
-            renderPriority(adaptStatus);
-            renderKPI(days);
-            renderSkillBreakdown(days);
-            renderStudyPlan(adaptStatus);
-            renderCharts();
-            renderHistoryTable();
-            renderWeeklyReport();
-            renderStreakPanel();
-            updateAllTaskTotals();
-            applyTaskPriority(adaptStatus);
-        }
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  FIX #1: renderGoalTracker() with Current/Target/Gap/Status
-        // ═══════════════════════════════════════════════════════════════════
-        function renderGoalTracker(pred) {
-            const el = document.getElementById("goalTrackerGrid");
-            const target = 55;
-
-            if (pred === null || pred === undefined) {
-                el.innerHTML = `
-                    <div class="goal-tracker-item">
-                        <div class="label">Current</div>
-                        <div class="value neutral">—</div>
-                    </div>
-                    <div class="goal-tracker-item">
-                        <div class="label">Target</div>
-                        <div class="value neutral">${target}%</div>
-                    </div>
-                    <div class="goal-tracker-item">
-                        <div class="label">Gap</div>
-                        <div class="value neutral">—</div>
-                    </div>
-                    <div class="goal-tracker-item">
-                        <div class="label">Status</div>
-                        <div><span class="status-badge na">No Data</span></div>
-                    </div>
-                `;
-                return;
-            }
-
-            const gap = pred - target;
-            const status = getGoalStatus(pred, target);
-
-            let statusClass = "neutral";
-            let statusBadgeClass = "need";
-            if (status === "Mastered") { statusClass = "good";
-                statusBadgeClass = "mastered"; } else if (status === "Achieved") { statusClass = "good";
-                statusBadgeClass = "achieved"; } else if (status === "Almost There") { statusClass = "warn";
-                statusBadgeClass = "almost"; } else if (status === "Need Work") { statusClass = "bad";
-                statusBadgeClass = "need"; }
-
-            const gapDisplay = gap >= 0 ? `+${gap.toFixed(1)}%` : `${gap.toFixed(1)}%`;
-
-            el.innerHTML = `
-                <div class="goal-tracker-item">
-                    <div class="label">Current</div>
-                    <div class="value ${statusClass}">${pred.toFixed(1)}%</div>
-                </div>
-                <div class="goal-tracker-item">
-                    <div class="label">Target</div>
-                    <div class="value neutral">${target}%</div>
-                </div>
-                <div class="goal-tracker-item">
-                    <div class="label">Gap</div>
-                    <div class="value ${statusClass}">${gapDisplay}</div>
-                </div>
-                <div class="goal-tracker-item">
-                    <div class="label">Status</div>
-                    <div><span class="status-badge ${statusBadgeClass}">${status}</span></div>
-                </div>
-            `;
-        }
-
-        // ── PRIORITY ──
-        function renderPriority(adaptStatus) {
-            const el = document.getElementById("priorityGrid");
-            const sorted = Object.entries(adaptStatus)
-                .filter(([, s]) => s.hasData || s.status === "INTENSIVE")
-                .sort((a, b) => {
-                    const order = { INTENSIVE: 0, FOCUS: 1, MAINTAIN: 2, REST: 3, UNKNOWN: 4 };
-                    return (order[a[1].status] - order[b[1].status]) || (b[1].urgency - a[1].urgency);
-                });
-            const top = sorted.slice(0, 12);
-            el.innerHTML = top.map(([id, s]) => {
-                const task = TASKS.find(t => t[0] === id);
-                const pClass = s.status === "INTENSIVE" ? "" :
-                    s.status === "FOCUS" ? "p-focus" :
-                    s.status === "MAINTAIN" ? "p-maintain" : "p-rest";
-                const barColor = s.status === "INTENSIVE" ? "var(--red)" :
-                    s.status === "FOCUS" ? "var(--yellow)" :
-                    s.status === "MAINTAIN" ? "var(--green)" : "#334155";
-                const accDisplay = s.hasData ? s.acc.toFixed(1) + "%" : "—";
-                const barW = s.hasData ? Math.min(100, s.acc) : 0;
-                const targetW = Math.min(100, s.target);
-                const trendLabel = s.trend === "above" ? "📈 vượt 3 ngày" :
-                    s.trend === "below" ? "📉 thấp 3 ngày" : "";
-                const adjLabel = s.loadAdj < 0 ? ` giảm ${Math.round(Math.abs(s.loadAdj)*100)}%` :
-                    s.loadAdj > 0 ? ` tăng ${Math.round(s.loadAdj*100)}%` : "";
-                return `
-              <div class="priority-card ${pClass}">
-                <div class="priority-card-header">
-                  <div class="priority-task-name">${task[1]}</div>
-                  <span class="priority-badge ${s.status}">${s.status}</span>
-                </div>
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${task[2]} · ${task[3]}% overall ${trendLabel}</div>
-                <div class="priority-bar-bg">
-                  <div class="priority-bar-fill" style="width:${barW}%;background:${barColor}"></div>
-                  <div class="priority-bar-target" style="left:${targetW}%"></div>
-                </div>
-                <div class="priority-meta">
-                  <span>Hiện: <strong>${accDisplay}</strong></span>
-                  <span>Target: ${s.target}%</span>
-                </div>
-                <div class="priority-action">💡 ${s.action}${adjLabel}</div>
-              </div>`;
-            }).join("");
-        }
-
-        // ── KPI ──
-        function renderKPI(days) {
-            const el = document.getElementById("kpiGrid");
-            let html = "";
-            TASKS.forEach(([id, en, vi, w]) => {
-                const c = calcTaskAccOverDays(id, days);
-                const target = KPI_TARGETS[id] || 55;
-                const has = c.max > 0;
-                const acc = has ? c.pct : 0;
-                const gap = has ? acc - target : 0;
-                let status = "na",
-                    statusLabel = "No Data",
-                    cardClass = "";
-                if (has) {
-                    if (acc >= target + 10) { status = "mastered";
-                        statusLabel = "✅ Mastered";
-                        cardClass = "status-mastered"; } else if (acc >= target) { status = "achieved";
-                        statusLabel = "✅ Achieved";
-                        cardClass = "status-achieved"; } else if (acc >= target - 10) { status = "almost";
-                        statusLabel = "🔄 Almost There";
-                        cardClass = "status-almost"; } else { status = "need";
-                        statusLabel = "⚠️ Need Work";
-                        cardClass = "status-need"; }
-                } else { statusLabel = "— No data";
-                    cardClass = ""; }
-                const gapDisplay = has ? (gap >= 0 ? `+${gap.toFixed(1)}%` : `${gap.toFixed(1)}%`) : "—";
-                html += `
-              <div class="kpi-card ${cardClass}">
-                <div class="kpi-title">${en} <span style="color:#475569;font-size:10px">(${w}%)</span></div>
-                <div class="kpi-score ${has ? scoreClass(acc) : "na"}">${has ? acc.toFixed(1)+"%" : "—"}</div>
-                <div class="kpi-sub">Target: ${target}% · Gap: ${gapDisplay}</div>
-                <span class="kpi-status ${status}">${statusLabel}</span>
-              </div>`;
-            });
-            el.innerHTML = html;
-        }
-
-        // ── SKILL BREAKDOWN ──
-        function renderSkillBreakdown(days) {
-            const el = document.getElementById("skillBreakdown");
-            const skills = [
-                { key: "speaking", label: "Speaking", color: "#38bdf8" },
-                { key: "writing", label: "Writing", color: "#a78bfa" },
-                { key: "reading", label: "Reading", color: "#22c55e" },
-                { key: "listening", label: "Listening", color: "#fb923c" },
-            ];
-            el.innerHTML = skills.map(s => {
-                const sc = calcSkillScore(s.key, days);
-                const pct = sc !== null ? (sc / 90) * 100 : 0;
-                const display = sc !== null ? sc.toFixed(1) : "—";
-                const cls = sc !== null ? (sc >= 55 ? "good" : sc >= 40 ? "warn" : "bad") : "";
-                const target = SKILL_TARGETS[s.key] || 55;
-                const gap = sc !== null ? sc - target : null;
-                const gapDisplay = gap !== null ? (gap >= 0 ? `+${gap.toFixed(1)}` : `${gap.toFixed(1)}`) : "—";
-                return `
-              <div class="skill-item">
-                <div class="label"><span>${s.label}</span><span class="val ${cls}">${display}</span></div>
-                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:${Math.min(100,pct)}%;background:${s.color}"></div></div>
-                <div class="gap">Target: ${target} · Gap: ${gapDisplay}</div>
-              </div>`;
-            }).join("");
-        }
-
-        // ── STUDY PLAN ──
-        function renderStudyPlan(adaptStatus) {
-            const box = document.getElementById("studyPlan");
-            const plan = getAdaptivePlan(adaptStatus);
-            box.innerHTML = plan.map(p => {
-                const isToday = p.dow === TODAY_DOW;
-                const taskItems = p.taskMeta.map(m => {
-                    const task = TASKS.find(t => t[0] === m.id);
-                    const dotColor = m.status === "INTENSIVE" ? "var(--red)" :
-                        m.status === "FOCUS" ? "var(--yellow)" :
-                        m.status === "MAINTAIN" ? "var(--green)" : "#334155";
-                    let cls = "",
-                        prefix = "•";
-                    if (m.isDaily) { cls = "daily-tag";
-                        prefix = "⭐"; }
-                    if (m.isBoosted) { cls = "boost-tag";
-                        prefix = "🔴"; }
-                    if (m.isReduced) { cls = "rest-tag"; }
-                    const repsTxt = m.isReduced ? "(nghỉ)" : `×${m.reps}`;
-                    return `<div class="${cls}"><span class="task-dot" style="background:${dotColor}"></span>${prefix} ${task[1]} <strong>${repsTxt}</strong></div>`;
-                }).join("");
-                const usedHrs = (p.usedMin / 60).toFixed(1);
-                const budgetHrs = (p.budgetMin / 60).toFixed(1);
-                return `
-              <div class="plan-day-card ${isToday ? "today-plan" : ""}">
-                <div class="plan-day-title">
-                  <span>${p.name} ${isToday ? "📍" : ""}</span>
-                  ${isToday ? '<span class="plan-day-badge today">HÔM NAY</span>' : ""}
-                </div>
-                <div style="font-size:10px;color:#475569;margin-bottom:6px">${p.note} · ⏱ ${usedHrs}/${budgetHrs}h</div>
-                ${p.leftoverNote ? `<div style="font-size:9px;color:var(--yellow);background:#f59e0b14;border-radius:6px;padding:3px 6px;margin-bottom:6px">⚠ ${p.leftoverNote}</div>` : ""}
-                ${p.noDataNote ? `<div style="font-size:9px;color:var(--muted);background:#1e293b;border-radius:6px;padding:3px 6px;margin-bottom:6px">💡 ${p.noDataNote}</div>` : ""}
-                <div class="plan-tasks">${taskItems}</div>
-              </div>`;
-            }).join("");
-        }
-
-        // ── TASK CARDS ──
-        function buildTaskCards() {
-            const container = document.getElementById("taskContainer");
-            container.innerHTML = "";
-            const days = getAllDays();
-
-            TASKS.forEach(([id, en, vi, weight, skill, schedule]) => {
-                const wClass = weightClass(weight);
-                const isTodaySched = schedule.includes(TODAY_DOW);
-                const schedDays = schedule.map(d => ["CN", "T2", "T3", "T4", "T5", "T6", "T7"][d]).join(", ");
-
-                const card = document.createElement("div");
-                card.className = "task-card";
-                card.dataset.id = id;
-                card.innerHTML = `
-                <div class="task-header">
-                  <div class="task-name">${en} ${isTodaySched ? "🔔" : ""}<span class="adapt-badge" id="adapbadge_${esc(id)}"></span></div>
-                  <span class="task-weight ${wClass}">${weight}%</span>
-                </div>
-                <div class="task-vi">${vi}</div>
-                <div class="task-schedule">📅 ${schedDays}${DAILY_TASKS.includes(id) ? ' · <span style="color:var(--green)">⭐ Daily</span>' : ""}</div>
-                <div class="day-blocks" id="blocks_${esc(id)}"></div>
-                <div class="task-total">
-                  <span class="tot-label">Tổng (<span class="range-label-small">hôm nay</span>)</span>
-                  <span class="tot-val empty" id="tot_${esc(id)}">—</span>
-                </div>`;
-                container.appendChild(card);
-
-                const blocksEl = document.getElementById(`blocks_${esc(id)}`);
-                days.forEach(day => { blocksEl.appendChild(buildDayBlock(id, day)); });
-                updateTaskTotal(id);
-            });
-        }
-
-        function buildDayBlock(taskId, day) {
-            const isToday = day === TODAY;
-            if (!DATA.__daily[day]) DATA.__daily[day] = {};
-            if (!Array.isArray(DATA.__daily[day][taskId])) DATA.__daily[day][taskId] = [];
-            const entries = DATA.__daily[day][taskId];
-
-            const block = document.createElement("div");
-            block.className = `day-block ${isToday ? "today" : ""}${!isToday ? " collapsed" : ""}`;
-            block.id = `block_${esc(taskId)}_${day}`;
-
-            const header = document.createElement("div");
-            header.className = "day-block-header";
-            header.innerHTML = `
-              <div class="day-block-label">
-                📅 ${fmtDate(day)}
-                ${isToday ? '<span class="today-badge">HÔM NAY</span>' : ""}
-              </div>
-              <div class="day-block-right">
-                <div class="day-block-summary empty" id="summary_${esc(taskId)}_${day}">—</div>
-                ${!isToday ? '<span class="collapse-icon">▶</span>' : ""}
-              </div>`;
-            block.appendChild(header);
-
-            if (!isToday) {
-                header.addEventListener("click", () => {
-                    block.classList.toggle("collapsed");
-                    const icon = header.querySelector(".collapse-icon");
-                    if (icon) icon.textContent = block.classList.contains("collapsed") ? "▶" : "▼";
-                });
-            }
-
-            const wrap = document.createElement("div");
-            wrap.className = "day-entries-wrap";
-
-            const list = document.createElement("div");
-            list.className = "entries-list";
-            list.id = `list_${esc(taskId)}_${day}`;
-            wrap.appendChild(list);
-
-            const startEntries = entries.length > 0 ? entries : [""];
-            startEntries.forEach((val, idx) => { list.appendChild(buildEntryRow(taskId, day, idx, val, isToday)); });
-
-            if (isToday) {
-                const addBtn = document.createElement("button");
-                addBtn.className = "add-entry-btn";
-                addBtn.textContent = "+ Thêm bài (Enter)";
-                addBtn.addEventListener("click", () => addNewEntry(taskId, day, list));
-                wrap.appendChild(addBtn);
-            }
-
-            const dayTot = document.createElement("div");
-            dayTot.className = "day-total";
-            dayTot.id = `daytot_${esc(taskId)}_${day}`;
-            wrap.appendChild(dayTot);
-
-            block.appendChild(wrap);
-            updateDayBlock(taskId, day);
-            return block;
-        }
-
-        function addNewEntry(taskId, day, list) {
-            if (!DATA.__daily[day]) DATA.__daily[day] = {};
-            if (!Array.isArray(DATA.__daily[day][taskId])) DATA.__daily[day][taskId] = [];
-            DATA.__daily[day][taskId].push("");
-            const idx = DATA.__daily[day][taskId].length - 1;
-            const row = buildEntryRow(taskId, day, idx, "", true);
-            list.appendChild(row);
-            row.querySelector(".entry-input").focus();
-            saveData();
-        }
-
-        function buildEntryRow(taskId, day, idx, val, isToday) {
-            const row = document.createElement("div");
-            row.className = "entry-row";
-            const score = parseScore(val);
-            const pct = score && score.max > 0 ? (score.raw / score.max) * 100 : 0;
-            const cls = score ? scoreClass(pct) : "empty";
-
-            if (isToday) {
-                row.innerHTML = `
-                <input class="entry-input" type="text" value="${val}" placeholder="vd: 9.8/13"
-                  data-task="${taskId}" data-date="${day}" data-idx="${idx}">
-                <div class="entry-pct ${cls}" id="epct_${esc(taskId)}_${day}_${idx}">${score && score.max > 0 ? pct.toFixed(1)+"%" : "—"}</div>
-                <button class="remove-btn">✕</button>`;
-
-                const input = row.querySelector(".entry-input");
-                input.addEventListener("input", () => {
-                    const v = input.value.trim();
-                    ensureArr(day, taskId, idx);
-                    DATA.__daily[day][taskId][idx] = v;
-                    const sc = parseScore(v);
-                    const el = document.getElementById(`epct_${esc(taskId)}_${day}_${idx}`);
-                    if (sc && sc.max > 0) {
-                        const p = (sc.raw / sc.max) * 100;
-                        el.textContent = p.toFixed(1) + "%";
-                        el.className = `entry-pct ${scoreClass(p)}`;
-                    } else { el.textContent = "—";
-                        el.className = "entry-pct empty"; }
-                    saveData();
-                    updateDayBlock(taskId, day);
-                    updateTaskTotal(taskId);
-                    renderAll();
-                });
-                input.addEventListener("keydown", e => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        const list = document.getElementById(`list_${esc(taskId)}_${day}`);
-                        addNewEntry(taskId, day, list);
-                    }
-                });
-                row.querySelector(".remove-btn").addEventListener("click", () => {
-                    if (!DATA.__daily[day] || !DATA.__daily[day][taskId]) return;
-                    DATA.__daily[day][taskId].splice(idx, 1);
-                    saveData();
-                    refreshDayBlock(taskId, day);
-                    updateTaskTotal(taskId);
-                    renderAll();
-                });
-            } else {
-                row.innerHTML = `
-                <div style="font-size:12px;color:var(--muted);padding:2px 4px">${val || "—"}</div>
-                <div class="entry-pct ${cls}">${score && score.max > 0 ? pct.toFixed(1)+"%" : "—"}</div>
-                <div></div>`;
-            }
-            return row;
-        }
-
-        function ensureArr(day, taskId, idx) {
-            if (!DATA.__daily[day]) DATA.__daily[day] = {};
-            if (!Array.isArray(DATA.__daily[day][taskId])) DATA.__daily[day][taskId] = [];
-            while (DATA.__daily[day][taskId].length <= idx) DATA.__daily[day][taskId].push("");
-        }
-
-        function refreshDayBlock(taskId, day) {
-            const old = document.getElementById(`block_${esc(taskId)}_${day}`);
-            if (!old) return;
-            old.replaceWith(buildDayBlock(taskId, day));
-        }
-
-        function updateDayBlock(taskId, day) {
-            const entries = DATA.__daily[day]?.[taskId] || [];
-            const c = calcEntries(entries);
-            const sumEl = document.getElementById(`summary_${esc(taskId)}_${day}`);
-            const totEl = document.getElementById(`daytot_${esc(taskId)}_${day}`);
-            if (c.cnt === 0) {
-                if (sumEl) { sumEl.textContent = "—";
-                    sumEl.className = "day-block-summary empty"; }
-                if (totEl) totEl.innerHTML = "";
-                return;
-            }
-            if (sumEl) { sumEl.textContent = c.pct.toFixed(1) + "%";
-                sumEl.className = `day-block-summary ${scoreClass(c.pct)}`; }
-            if (totEl) totEl.innerHTML = `
-              <span class="day-total-label">${c.cnt} bài · ${c.raw.toFixed(1)}/${c.max.toFixed(1)}</span>
-              <span class="tot-val ${scoreClass(c.pct)}">TB: ${c.pct.toFixed(1)}%</span>`;
-        }
-
-        function updateTaskTotal(taskId) {
-            const days = getDaysInRange(currentRange);
-            let tr = 0,
-                tm = 0,
-                cnt = 0;
-            days.forEach(d => {
-                const c = calcEntries(DATA.__daily[d]?.[taskId] || []);
-                tr += c.raw;
-                tm += c.max;
-                cnt += c.cnt;
-            });
-            const tp = tm > 0 ? (tr / tm) * 100 : 0;
-            const el = document.getElementById(`tot_${esc(taskId)}`);
-            if (el) {
-                el.className = `tot-val ${tm > 0 ? scoreClass(tp) : "empty"}`;
-                el.textContent = tm > 0 ? `${cnt} bài · ${tr.toFixed(1)}/${tm.toFixed(1)} · TB ${tp.toFixed(1)}%` : "—";
-                const card = el.closest(".task-card");
-                if (card) {
-                    const rl = card.querySelector(".range-label-small");
-                    if (rl) rl.textContent = { today: "hôm nay", "7days": "7 ngày", all: "tất cả" } [currentRange];
-                }
-            }
-            const badge = document.getElementById(`adapbadge_${esc(taskId)}`);
-            if (badge) {
-                const adapt = getAdaptiveStatus(getDaysInRange(currentRange))[taskId];
-                if (adapt && adapt.status === "INTENSIVE") { badge.textContent = "⚠ INTENSIVE";
-                    badge.className = "adapt-badge boost"; } else if (adapt && adapt.status === "REST") { badge
-                        .textContent = "✓ REST";
-                    badge.className = "adapt-badge reduce"; } else { badge.textContent = "";
-                    badge.className = "adapt-badge"; }
-            }
-        }
-
-        function updateAllTaskTotals() { TASKS.forEach(([id]) => updateTaskTotal(id)); }
-
-        function applyTaskPriority(adaptStatus) {
-            document.querySelectorAll(".task-card").forEach(card => {
-                const id = card.dataset.id;
-                const st = adaptStatus[id]?.status || "UNKNOWN";
-                card.classList.remove("status-intensive", "status-focus", "status-maintain", "status-rest",
-                    "status-unknown");
-                card.classList.add(`status-${st.toLowerCase()}`);
-            });
-        }
-
-        // ── CHARTS ──
-        let accChart = null,
-            predChart = null,
-            radarChart = null;
-
-        function renderCharts() {
-            const hist = DATA.__history;
-            if (!hist || !hist.length) return;
-            const labels = hist.map(x => fmtDate(x.date));
-            const todayData = hist.map(x => +((x.todayAcc || 0).toFixed(1)));
-            const predData = hist.map(x => +((x.weightedPred || 0).toFixed(1)));
-            const spData = hist.map(x => +((x.skillSpeaking || 0).toFixed(1)));
-            const wrData = hist.map(x => +((x.skillWriting || 0).toFixed(1)));
-            const rdData = hist.map(x => +((x.skillReading || 0).toFixed(1)));
-            const liData = hist.map(x => +((x.skillListening || 0).toFixed(1)));
-            const grid = "#1e293b",
-                tick = "#64748b";
-            const baseOpts = {
-                responsive: true,
-                plugins: { legend: { display: true, labels: { color: "#94a3b8", boxWidth: 12 } } },
-                scales: { x: { ticks: { color: tick }, grid: { color: grid } }, y: { ticks: { color: tick },
-                        grid: { color: grid } } }
-            };
-
-            const c1 = document.getElementById("accChart").getContext("2d");
-            if (accChart) accChart.destroy();
-            accChart = new Chart(c1, {
-                type: "line",
-                data: { labels, datasets: [{ label: "Acc hôm đó %", data: todayData, tension: .3,
-                        borderColor: "#38bdf8", backgroundColor: "rgba(56,189,248,.08)", fill: true,
-                        pointRadius: 3 }] },
-                options: baseOpts
-            });
-
-            const c2 = document.getElementById("predChart").getContext("2d");
-            if (predChart) predChart.destroy();
-            predChart = new Chart(c2, {
-                type: "line",
-                data: {
-                    labels,
-                    datasets: [
-                        { label: "PTE Prediction", data: predData, tension: .3, borderColor: "#a78bfa",
-                            backgroundColor: "rgba(167,139,250,.08)", fill: true, pointRadius: 3 },
-                        { label: "Target 55", data: Array(labels.length).fill(55), borderColor: "#ef4444",
-                            borderDash: [6, 3], pointRadius: 0 },
-                        { label: "Speaking", data: spData, tension: .3, borderColor: "#38bdf8",
-                            borderDash: [2, 2], pointRadius: 0 },
-                        { label: "Writing", data: wrData, tension: .3, borderColor: "#a78bfa",
-                            borderDash: [2, 2], pointRadius: 0 },
-                        { label: "Reading", data: rdData, tension: .3, borderColor: "#22c55e",
-                            borderDash: [2, 2], pointRadius: 0 },
-                        { label: "Listening", data: liData, tension: .3, borderColor: "#fb923c",
-                            borderDash: [2, 2], pointRadius: 0 }
-                    ]
-                },
-                options: baseOpts
-            });
-
-            // ═══════════════════════════════════════════════════════════════
-            //  FIX #2: Radar Chart with DYNAMIC targets from SKILL_TARGETS
-            // ═══════════════════════════════════════════════════════════════
-            const allDays = getAllDays();
-            const sp = calcSkillScore("speaking", allDays) || 0;
-            const wr = calcSkillScore("writing", allDays) || 0;
-            const rd = calcSkillScore("reading", allDays) || 0;
-            const li = calcSkillScore("listening", allDays) || 0;
-
-            const c3 = document.getElementById("radarChart").getContext("2d");
-            if (radarChart) radarChart.destroy();
-            radarChart = new Chart(c3, {
-                type: "radar",
-                data: {
-                    labels: ["Speaking", "Writing", "Reading", "Listening"],
-                    datasets: [
-                        { label: "Hiện tại", data: [sp, wr, rd, li], borderColor: "#38bdf8",
-                            backgroundColor: "rgba(56,189,248,.15)", pointRadius: 3 },
-                        // ✅ DYNAMIC TARGETS per skill
-                        { label: "Target", data: [
-                                SKILL_TARGETS.speaking,
-                                SKILL_TARGETS.writing,
-                                SKILL_TARGETS.reading,
-                                SKILL_TARGETS.listening
-                            ], borderColor: "#ef4444", backgroundColor: "transparent", borderDash: [4, 4],
-                            pointRadius: 0 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: { r: { min: 0, max: 90, ticks: { color: tick, stepSize: 15 }, grid: { color: grid },
-                            pointLabels: { color: "#94a3b8" } } },
-                    plugins: { legend: { labels: { color: "#94a3b8", boxWidth: 12 } } }
-                }
-            });
-        }
-
-        // ── HISTORY TABLE ──
-        function renderHistoryTable() {
-            const tbody = document.getElementById("historyBody");
-            const hist = [...(DATA.__history || [])].reverse();
-            tbody.innerHTML = hist.map(h => {
-                const dd = DATA.__daily[h.date] || {};
-                let total = 0;
-                Object.values(dd).forEach(arr => { if (Array.isArray(arr)) total += arr.filter(v => parseScore(v))
-                        .length; });
-                const isT = h.date === TODAY;
-                return `<tr class="${isT ? "today-row" : ""}">
-                <td>${h.date}${isT ? " 📍" : ""}</td>
-                <td>${(h.todayAcc || 0).toFixed(1)}%</td>
-                <td>${h.weightedPred ? h.weightedPred.toFixed(1) : "—"}</td>
-                <td>${(h.allAcc || 0).toFixed(1)}%</td>
-                <td>${total}</td>
-              </tr>`;
-            }).join("");
-        }
-
-        // ── WEEKLY REPORT ──
-        function renderWeeklyReport() {
-            const box = document.getElementById("weeklyReport");
-            const hist = DATA.__history;
-            if (!hist || hist.length < 2) { box.innerHTML =
-                '<p style="color:var(--muted);font-size:13px">Cần ít nhất 2 ngày dữ liệu.</p>'; return; }
-            const week = hist.slice(-7);
-            const first = week[0],
-                last = week[week.length - 1];
-            const predChange = (last.weightedPred || 0) - (first.weightedPred || 0);
-            const accChange = (last.allAcc || 0) - (first.allAcc || 0);
-            const avgAcc = week.reduce((s, x) => s + (x.todayAcc || 0), 0) / week.length;
-            const activeDays = week.filter(x => (x.todayAcc || 0) > 0).length;
-            let totalEntries = 0;
-            week.forEach(h => { Object.values(DATA.__daily[h.date] || {}).forEach(arr => { if (Array.isArray(arr))
-                        totalEntries += arr.filter(v => parseScore(v)).length; }); });
-            const chgClass = v => v > 0 ? "up" : v < 0 ? "down" : "flat";
-            const sign = v => v > 0 ? "+" : "";
-            box.innerHTML = `
-            <p style="color:var(--muted);font-size:12px;margin-bottom:10px">7 ngày: ${fmtDate(first.date)} → ${fmtDate(last.date)}</p>
-            <div class="report-grid">
-              <div class="report-card"><div class="report-title">Prediction thay đổi</div><div class="report-val ${chgClass(predChange)}">${sign(predChange)}${predChange.toFixed(1)}</div></div>
-              <div class="report-card"><div class="report-title">Acc tích lũy thay đổi</div><div class="report-val ${chgClass(accChange)}">${sign(accChange)}${accChange.toFixed(1)}%</div></div>
-              <div class="report-card"><div class="report-title">Avg acc / ngày</div><div class="report-val ${scoreClass(avgAcc)}">${avgAcc.toFixed(1)}%</div></div>
-              <div class="report-card"><div class="report-title">Ngày luyện tập</div><div class="report-val">${activeDays}/${week.length}</div></div>
-              <div class="report-card"><div class="report-title">Tổng bài nhập</div><div class="report-val">${totalEntries}</div></div>
-              <div class="report-card"><div class="report-title">Cần tăng thêm</div><div class="report-val bad">${Math.max(0, 55 - (last.weightedPred || 0)).toFixed(1)}</div></div>
-            </div>`;
-        }
-
-        // ── STREAK ──
-        function renderStreakPanel() {
-            const box = document.getElementById("streakPanel");
-            const streak = calcStreak();
-            const dots = [];
-            for (let i = 29; i >= 0; i--) {
-                const d = new Date(TODAY);
-                d.setDate(d.getDate() - i);
-                const k = d.toISOString().slice(0, 10);
-                const a = calcDayAcc(k);
-                dots.push(
-                    `<div class="streak-dot ${a.max > 0 ? "active" : "inactive"}${k === TODAY ? " today-dot" : ""}" title="${k}"></div>`
-                    );
-            }
-            box.innerHTML = `
-            <p style="font-size:13px;margin-bottom:8px">Streak: <strong style="color:var(--green)">${streak} ngày 🔥</strong></p>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:8px">30 ngày gần nhất</p>
-            <div class="streak-bar">${dots.join("")}</div>`;
-        }
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  FILTER + TABS
-        // ═══════════════════════════════════════════════════════════════════
-        document.querySelectorAll(".filter-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                currentRange = btn.dataset.range;
-                renderAll();
-                updateAllTaskTotals();
-            });
-        });
-
-        document.querySelectorAll(".tab").forEach(tab => {
-            tab.addEventListener("click", () => {
-                document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-                tab.classList.add("active");
-                ["chart", "table", "weekly", "streak"].forEach(id => { document.getElementById(`tab-${id}`)
-                        .style.display = "none"; });
-                const t = tab.dataset.tab;
-                document.getElementById(`tab-${t}`).style.display = "block";
-                if (t === "chart") renderCharts();
-            });
-        });
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  EXPORT / IMPORT / RESET
-        // ═══════════════════════════════════════════════════════════════════
-        document.getElementById("exportJSON").addEventListener("click", () => {
-            const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `pte_v8_backup_${TODAY}.json`;
-            a.click();
-        });
-
-        document.getElementById("importJSON").addEventListener("click", () => { document.getElementById("importFile")
-                .click(); });
-        document.getElementById("importFile").addEventListener("change", e => {
-            const f = e.target.files[0];
-            if (!f) return;
-            const r = new FileReader();
-            r.onload = () => {
-                try { const imp = JSON.parse(r.result);
-                    Object.assign(DATA, imp);
-                    saveData();
-                    location.reload(); } catch { alert("File không hợp lệ!"); }
-            };
-            r.readAsText(f);
-        });
-
-        document.getElementById("exportCSV").addEventListener("click", () => {
-            const days = getAllDays().reverse();
-            let csv = "Date,TaskID,Task,Bai,Score,Pct%,DayAcc%,Prediction\n";
-            days.forEach(day => {
-                const dAcc = calcDayAcc(day).pct;
-                const pred = calcPrediction([day]);
-                const dd = DATA.__daily[day] || {};
-                let hasRow = false;
-                Object.entries(dd).forEach(([tid, arr]) => {
-                    const t = TASKS.find(x => x[0] === tid);
-                    if (!t) return;
-                    (arr || []).forEach((v, i) => {
-                        const sc = parseScore(v);
-                        const pct = sc && sc.max > 0 ? (sc.raw / sc.max) * 100 : 0;
-                        csv +=
-                            `${day},${tid},"${t[1]}",${i+1},"${v}",${pct.toFixed(2)},${dAcc.toFixed(2)},${pred !== null ? pred.toFixed(2) : ""}\n`;
-                        hasRow = true;
-                    });
-                });
-                if (!hasRow) csv += `${day},,,,,,${dAcc.toFixed(2)},${pred !== null ? pred.toFixed(2) : ""}\n`;
-            });
-            const blob = new Blob([csv], { type: "text/csv" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `pte_v8_${TODAY}.csv`;
-            a.click();
-        });
-
-        document.getElementById("resetAll").addEventListener("click", () => {
-            if (!confirm("Xóa toàn bộ dữ liệu? Không thể hoàn tác!")) return;
-            localStorage.removeItem("pte_v8");
-            location.reload();
-        });
-
-        // ═══════════════════════════════════════════════════════════════════
-        //  INIT
-        // ═══════════════════════════════════════════════════════════════════
-        buildTaskCards();
-        renderAll();
-
-        setInterval(saveData, 30000);
-        window.addEventListener("beforeunload", saveData);
-    </script>
+    <div class="strategy-card" style="border-color:var(--yellow)">
+      <h3><span>🟡</span> SST — Tóm tắt nghe (4%)</h3>
+      <ul>
+        <li><span class="bullet">→</span> Ghi note theo <strong>keywords</strong>, không ghi câu đầy đủ</li>
+        <li><span class="bullet">→</span> Summary cần: Topic sentence + 2 key points + concluding idea</li>
+        <li><span class="bullet">→</span> Tránh dùng từ nguyên văn từ bài nghe — paraphrase ngay</li>
+        <li><span class="bullet">→</span> Luyện 1–2 bài SST đủ — đây là task 10 phút/bài nên không cần nhiều</li>
+        <li><span class="bullet">→</span> Target: từ 46.7% → 56%+</li>
+      </ul>
+    </div>
+
+    <div class="strategy-card" style="border-color:var(--yellow)">
+      <h3><span>🟡</span> WFD — Write From Dictation (5%)</h3>
+      <ul>
+        <li><span class="bullet">→</span> Daily task — không bỏ ngày nào</li>
+        <li><span class="bullet">→</span> Luyện <strong>theo chunk</strong>: nghe xong nhẩm lại nguyên câu trước khi gõ</li>
+        <li><span class="bullet">→</span> Chú ý: articles (a/the), prepositions, -s/-es cuối từ</li>
+        <li><span class="bullet">→</span> Luyện 15–20 bài/ngày, chia đều 2 lần sáng/tối</li>
+        <li><span class="bullet">→</span> Target: từ 51.2% → 58%+</li>
+      </ul>
+    </div>
+
+    <div class="strategy-card" style="border-color:var(--yellow)">
+      <h3><span>🟡</span> FIB Dropdown + FIL Listening (7%+3%)</h3>
+      <ul>
+        <li><span class="bullet">→</span> FIB: đọc cả câu trước khi chọn — collocation quyết định đáp án</li>
+        <li><span class="bullet">→</span> FIL: nghe tổng thể trước, điền sau — đừng điền realtime</li>
+        <li><span class="bullet">→</span> Luyện chung nhau trong 1 session để tiết kiệm thời gian</li>
+        <li><span class="bullet">→</span> 10–12 bài mỗi task mỗi ngày đủ tập hôm đó</li>
+        <li><span class="bullet">→</span> FIB target: 50% → 58% | FIL target: 54.8% → 60%+</li>
+      </ul>
+    </div>
+
+    <div class="strategy-card" style="border-color:var(--green)">
+      <h3><span>✅</span> RS — Repeat Sentence (7%)</h3>
+      <ul>
+        <li><span class="bullet">→</span> Đang ở 57.9% — maintain, đừng thay đổi cách làm</li>
+        <li><span class="bullet">→</span> 15–20 bài/ngày là đủ — không cần push thêm</li>
+        <li><span class="bullet">→</span> Nếu cảm thấy đuối vào cuối ngày → RS là task làm sau cùng</li>
+      </ul>
+    </div>
+
+    <div class="strategy-card" style="border-color:var(--red)">
+      <h3><span>❌</span> FDD + WE — Bỏ sprint</h3>
+      <ul>
+        <li><span class="bullet">→</span> FDD: 35.7% → cần +19% trong 8 ngày → <strong>không khả thi</strong></li>
+        <li><span class="bullet">→</span> WE: 45.8% → Writing essay không cải thiện nhanh trong 8 ngày</li>
+        <li><span class="bullet">→</span> Vẫn làm 1 bài FDD và 1 bài WE mỗi 2 ngày để giữ điểm không rớt thêm</li>
+        <li><span class="bullet">→</span> <strong>Không đầu tư thêm thời gian vào 2 task này</strong></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 5 QUY TẮC VÀNG ── -->
+<div class="section">
+  <div class="section-title"><h2>🏆 5 Quy tắc vàng 8 ngày cuối</h2><span class="tag tag-red">không được bỏ</span></div>
+  <div class="rules-grid">
+    <div class="rule-card">
+      <div class="rule-num">01</div>
+      <div class="rule-title">SGD mỗi ngày, không trừ ngày nào</div>
+      <div class="rule-text">Đây là task có weight cao nhất (9%) trong nhóm bạn đang yếu. Mỗi ngày ít nhất 3 bài SGD. Streak quan trọng hơn số lượng.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">02</div>
+      <div class="rule-title">RS + WFD là core — sáng làm ngay</div>
+      <div class="rule-text">Làm ngay sau khi thức dậy, trước khi làm bất kỳ task nào khác. Không để đến chiều hoặc tối mới làm.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">03</div>
+      <div class="rule-title">Không học kỹ năng mới</div>
+      <div class="rule-text">8 ngày không đủ để học thêm vocabulary mới, chiến lược mới, hay luyện task chưa luyện. Chỉ tập trung vào task đã có data.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">04</div>
+      <div class="rule-title">Ngủ đủ 7h — không thức khuya</div>
+      <div class="rule-text">Luyện PTE cần bộ nhớ ngắn hạn hoạt động tốt. Thiếu ngủ làm RS, WFD, SST rớt điểm ngay ngày hôm sau.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">05</div>
+      <div class="rule-title">Ngày thi: làm đúng thứ tự bài thi</div>
+      <div class="rule-text">Không được bỏ câu, không được nhảy qua. Kể cả task khó — làm xong rồi mới tiếp. Panic = điểm rớt.</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  PTE 55+ Final Sprint · Data thực tế ngày 12/07/2026 · Còn 8 ngày · Good luck! 🔥
+</div>
+
+</div>
+
+<script>
+// ── COUNTDOWN ──
+function updateCountdown() {
+  const exam = new Date("2026-07-20");
+  const now = new Date();
+  const days = Math.ceil((exam - now) / 86400000);
+  document.getElementById("daysLeft").textContent = days;
+}
+updateCountdown();
+
+// ── BUILD 8-DAY PLAN ──
+const DAYS = [
+  {
+    date: "12/07", dow: "CN", dayNum: "1", label: "HÔM NAY",
+    hours: 10,
+    focus: "SGD Sprint + RS + WFD Daily Core",
+    isToday: true,
+    note: { type: "critical", text: "Ngày đầu tiên — lập thói quen ĐÚNG từ hôm nay. SGD ưu tiên số 1." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",    pill:"daily",  reps:"×20", boost: false },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×18", boost: false },
+      { id:"SGD", name:"Summarise Group Disc",pill:"sprint", reps:"×5",  boost: true },
+      { id:"FIB", name:"FIB Dropdown",        pill:"sprint", reps:"×10", boost: false },
+      { id:"FIL", name:"Fill In The Blanks",  pill:"sprint", reps:"×8",  boost: false },
+      { id:"RA",  name:"Read Aloud",          pill:"hold",   reps:"×5 sàn", boost: false },
+    ]
+  },
+  {
+    date: "13/07", dow: "Thứ 2", dayNum: "2",
+    hours: 10,
+    focus: "Speaking nặng: SGD + RL + RA sàn",
+    note: { type: "strategy", text: "T2 là ngày học nhiều nhất — dồn SGD và SST hôm nay." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",    pill:"daily",  reps:"×20" },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×18" },
+      { id:"SGD", name:"Summarise Group Disc",pill:"sprint", reps:"×6", boost: true },
+      { id:"SST", name:"Summarize Spoken Text",pill:"sprint",reps:"×2", boost: true },
+      { id:"FIB", name:"FIB Dropdown",        pill:"sprint", reps:"×12" },
+      { id:"RA",  name:"Read Aloud",          pill:"hold",   reps:"×5 sàn" },
+    ]
+  },
+  {
+    date: "14/07", dow: "Thứ 3", dayNum: "3",
+    hours: 5,
+    focus: "Ngày ít giờ — tập trung WFD + SGD",
+    note: { type: "strategy", text: "5h học: ưu tiên RS+WFD+SGD. Không làm task dài như SST hôm nay." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",     pill:"daily", reps:"×15" },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×15" },
+      { id:"SGD", name:"Summarise Group Disc", pill:"sprint",reps:"×4", boost: true },
+      { id:"FIL", name:"Fill In The Blanks",  pill:"sprint", reps:"×10" },
+    ]
+  },
+  {
+    date: "15/07", dow: "Thứ 4", dayNum: "4",
+    hours: 2,
+    focus: "Ngày rất ít giờ — chỉ Daily Core + 1 sprint",
+    note: { type: "strategy", text: "2h học: chỉ làm RS+WFD+SGD×2. Không ép thêm — chất lượng hơn số lượng." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",     pill:"daily", reps:"×12" },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×12" },
+      { id:"SGD", name:"Summarise Group Disc", pill:"sprint",reps:"×2", boost: true },
+    ]
+  },
+  {
+    date: "16/07", dow: "Thứ 5", dayNum: "5",
+    hours: 10,
+    focus: "Reading Sprint: FIB + FDD + SST",
+    note: { type: "strategy", text: "Ngày 10h — đây là cơ hội tốt nhất để push FIB và SST cùng lúc." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",     pill:"daily", reps:"×20" },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×18" },
+      { id:"SGD", name:"Summarise Group Disc", pill:"sprint",reps:"×5", boost: true },
+      { id:"FIB", name:"FIB Dropdown",         pill:"sprint",reps:"×15" },
+      { id:"FDD", name:"FIB Drag & Drop",      pill:"hold",  reps:"×3 giữ sàn" },
+      { id:"SST", name:"Summarize Spoken Text",pill:"sprint",reps:"×2", boost: true },
+    ]
+  },
+  {
+    date: "17/07", dow: "Thứ 6", dayNum: "6",
+    hours: 2,
+    focus: "Ngày rất ít giờ — Daily Core + review lỗi",
+    note: { type: "strategy", text: "2h: RS+WFD+review lỗi hôm qua. Không học mới — consolidate." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",     pill:"daily", reps:"×12" },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×12" },
+      { id:"FIL", name:"Fill In The Blanks",  pill:"sprint",reps:"×8" },
+    ]
+  },
+  {
+    date: "18/07", dow: "Thứ 7", dayNum: "7",
+    hours: 10,
+    focus: "Full Mock + Listening Sprint cuối",
+    note: { type: "critical", text: "Ngày cuối cùng luyện mạnh — làm 1 full mock test, rồi review đúng sai." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",     pill:"daily", reps:"×20" },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×18" },
+      { id:"SGD", name:"Summarise Group Disc", pill:"sprint",reps:"×4", boost: true },
+      { id:"SST", name:"Summarize Spoken Text",pill:"sprint",reps:"×2" },
+      { id:"FIL", name:"Fill In The Blanks",  pill:"sprint",reps:"×10" },
+      { id:"FIB", name:"FIB Dropdown",         pill:"sprint",reps:"×10" },
+      { id:"RA",  name:"Read Aloud",           pill:"hold",  reps:"×5 sàn" },
+    ]
+  },
+  {
+    date: "19/07", dow: "CN", dayNum: "8",
+    hours: 4,
+    focus: "NGÀY THI TRƯỚC — nghỉ ngơi, warm-up nhẹ",
+    isPreExam: true,
+    note: { type: "critical", text: "KHÔNG học nặng hôm nay. Chỉ warm-up nhẹ sáng sớm. Ngủ sớm trước 22h." },
+    tasks: [
+      { id:"RS",  name:"Repeat Sentence",     pill:"daily", reps:"×10 nhẹ" },
+      { id:"WFD", name:"Write From Dictation",pill:"daily", reps:"×10 nhẹ" },
+      { id:"RA",  name:"Read Aloud",           pill:"hold",  reps:"×3 fluency" },
+    ]
+  },
+];
+
+// Color map
+const pillColors = {
+  daily: "pill-green",
+  sprint: "pill-red",
+  hold: "pill-blue",
+};
+
+function buildDayCards() {
+  const grid = document.getElementById("daysGrid");
+
+  DAYS.forEach(d => {
+    const isPast = false;
+    const isExam = d.isPreExam;
+    const cls = d.isToday ? "today" : isExam ? "exam" : "";
+
+    const taskRows = d.tasks.map(t => {
+      const pillCls = pillColors[t.pill] || "pill-gray";
+      const repsCls = t.boost ? "boost" : t.pill === "daily" ? "daily" : "";
+      return `
+        <div class="task-row">
+          <span class="task-pill ${pillCls}">${t.id}</span>
+          <span class="task-name-text">${t.name}</span>
+          <span class="task-reps ${repsCls}">${t.reps}</span>
+        </div>`;
+    }).join("");
+
+    const noteHtml = d.note
+      ? `<div class="day-note ${d.note.type}">${d.note.text}</div>`
+      : "";
+
+    const budgetPct = Math.min(100, (d.hours / 10) * 100);
+    const hourBar = `
+      <div class="hour-bar">
+        <span>${d.hours}h</span>
+        <div class="hour-bar-bg"><div class="hour-bar-fill" style="width:${budgetPct}%"></div></div>
+        <span>budget</span>
+      </div>`;
+
+    let badges = "";
+    if (d.isToday) badges += `<span class="badge badge-today">📍 HÔM NAY</span>`;
+    if (d.hours <= 3) badges += `<span class="badge badge-light">⏱ Ít giờ</span>`;
+    if (d.isPreExam) badges += `<span class="badge badge-exam">🎯 PRE-EXAM</span>`;
+
+    grid.innerHTML += `
+      <div class="day-card ${cls}">
+        <div class="day-header">
+          <div class="date-info">
+            <div>
+              <div class="day-num">${d.date}</div>
+              <div class="day-name">${d.dow}</div>
+            </div>
+          </div>
+          <div class="day-badges">${badges || `<span class="badge badge-light">Ngày ${d.dayNum}</span>`}</div>
+        </div>
+        <div class="day-body">
+          <div class="focus-label">FOCUS HÔM NAY</div>
+          <div class="focus-text">${d.focus}</div>
+          <div class="task-list">${taskRows}</div>
+          ${hourBar}
+          ${noteHtml}
+        </div>
+      </div>`;
+  });
+}
+
+buildDayCards();
+</script>
 </body>
 </html>
