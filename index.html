@@ -401,29 +401,76 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 
 <!-- TAB: TRACKER -->
 <div id="tab-tracker" style="display:none">
+
+  <!-- Mock score summary -->
   <div class="overall-box">
     <div class="overall-top">
       <div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">PREDICTED SCORE</div>
-        <div class="overall-num c-yellow" id="predScore">—</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">MOCK GẦN NHẤT</div>
+        <div class="overall-num c-yellow">41</div>
       </div>
-      <div class="overall-target">Mục tiêu: <span>50</span><br>
-        <span style="font-size:11px;color:var(--muted)">Gap: <span id="predGap" style="font-family:monospace">—</span></span>
+      <div class="overall-target">Mục tiêu: <span>50</span>
+        <div style="margin-top:6px;font-size:11px;color:var(--muted)">Gap: <span style="font-family:monospace;color:var(--red)">−9</span></div>
       </div>
     </div>
-    <div class="prog-bg"><div class="prog-fill" id="progFill" style="width:0%;background:var(--red)"></div></div>
-    <div class="prog-labels"><span>0</span><span>Target 50</span><span>90</span></div>
-    <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px;">
-      <div class="skill-row"><span class="skill-name">Speaking</span><div class="skill-bar-bg"><div class="skill-bar-f" id="sb-speaking" style="width:0%;background:#38bdf8"></div></div><span class="skill-val" id="sv-speaking">—</span></div>
-      <div class="skill-row"><span class="skill-name">Writing</span><div class="skill-bar-bg"><div class="skill-bar-f" id="sb-writing" style="width:0%;background:#a78bfa"></div></div><span class="skill-val" id="sv-writing">—</span></div>
-      <div class="skill-row"><span class="skill-name">Reading</span><div class="skill-bar-bg"><div class="skill-bar-f" id="sb-reading" style="width:0%;background:#22c55e"></div></div><span class="skill-val" id="sv-reading">—</span></div>
-      <div class="skill-row"><span class="skill-name">Listening</span><div class="skill-bar-bg"><div class="skill-bar-f" id="sb-listening" style="width:0%;background:#fb923c"></div></div><span class="skill-val" id="sv-listening">—</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;">
+      <div style="text-align:center;background:var(--card);border-radius:8px;padding:8px 4px;border:1px solid var(--red)30;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">SPEAKING</div>
+        <div style="font-size:22px;font-weight:800;font-family:monospace;color:var(--red)">35</div>
+        <div style="font-size:9px;color:var(--red)">▼ ưu tiên #1</div>
+      </div>
+      <div style="text-align:center;background:var(--card);border-radius:8px;padding:8px 4px;border:1px solid var(--green)30;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">WRITING</div>
+        <div style="font-size:22px;font-weight:800;font-family:monospace;color:var(--green)">53</div>
+        <div style="font-size:9px;color:var(--green)">✅ giữ nguyên</div>
+      </div>
+      <div style="text-align:center;background:var(--card);border-radius:8px;padding:8px 4px;border:1px solid var(--green)30;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">READING</div>
+        <div style="font-size:22px;font-weight:800;font-family:monospace;color:var(--green)">45</div>
+        <div style="font-size:9px;color:var(--green)">✅ giữ nguyên</div>
+      </div>
+      <div style="text-align:center;background:var(--card);border-radius:8px;padding:8px 4px;border:1px solid var(--green)30;">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">LISTENING</div>
+        <div style="font-size:22px;font-weight:800;font-family:monospace;color:var(--green)">45</div>
+        <div style="font-size:9px;color:var(--green)">✅ giữ nguyên</div>
+      </div>
     </div>
   </div>
+
+  <!-- Daily session tracker -->
   <div class="section">
-    <h2>✏️ Nhập điểm luyện tập <span class="tag tag-blue">format: số/số ví dụ 18/24</span></h2>
-    <div class="tracker-grid" id="trackerGrid"></div>
+    <h2>✏️ Nhập điểm theo buổi <span class="tag tag-blue">đúng/tổng · ví dụ: 18/24</span></h2>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+      <button class="sess-btn active" data-s="sang">🌅 Sáng</button>
+      <button class="sess-btn" data-s="chieu">☀️ Chiều</button>
+      <button class="sess-btn" data-s="toi">🌙 Tối</button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <label style="font-size:11px;color:var(--muted)">Ngày:</label>
+        <input id="dayPicker" type="number" min="1" max="30" value="1"
+          style="width:54px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;font-family:monospace;outline:none;text-align:center;">
+      </div>
+    </div>
+    <div id="sessionGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;"></div>
+    <button id="saveSession" style="margin-top:14px;width:100%;padding:10px;background:var(--blue);color:#000;font-weight:700;font-size:13px;border:none;border-radius:8px;cursor:pointer;">
+      💾 Lưu buổi này
+    </button>
+    <div id="saveMsg" style="text-align:center;font-size:11px;color:var(--green);margin-top:6px;height:16px;"></div>
   </div>
+
+  <!-- History -->
+  <div class="section">
+    <h2>📊 Lịch sử luyện tập</h2>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:500px;">
+        <thead>
+          <tr id="histHead" style="background:var(--surface);"></tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+      <div id="noHistory" style="color:var(--muted);font-size:12px;padding:16px;text-align:center;">Chưa có dữ liệu — nhập điểm buổi đầu tiên ở trên.</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- TAB: RULES -->
@@ -448,146 +495,228 @@ const EXAM_DATE = new Date("2026-07-28");
 function daysLeft(){return Math.max(0,Math.ceil((EXAM_DATE-new Date())/86400000));}
 document.getElementById("daysLeft").textContent = daysLeft();
 
-const TRACKER_TASKS = [
-  {id:"RS",  name:"Repeat Sentence",       skill:"speaking",  w:7, baseline:20, target:55, color:"#38bdf8"},
-  {id:"WFD", name:"Write From Dictation",  skill:"both",      w:5, baseline:44, target:65, color:"#a78bfa"},
-  {id:"SST", name:"Summarize Spoken Text", skill:"listening", w:4, baseline:0,  target:45, color:"#fb923c"},
-  {id:"FIBrw",name:"FIB Drag & Drop",     skill:"reading",   w:6, baseline:37, target:55, color:"#22c55e"},
-  {id:"RA",  name:"Read Aloud",            skill:"speaking",  w:4, baseline:50, target:55, color:"#38bdf8"},
-  {id:"DI",  name:"Describe Image",        skill:"speaking",  w:15,baseline:68, target:68, color:"#38bdf8"},
-  {id:"RL",  name:"Retell Lecture",        skill:"speaking",  w:6, baseline:47, target:50, color:"#38bdf8"},
-  {id:"SWT", name:"Summarize Written Text",skill:"writing",   w:7, baseline:56, target:60, color:"#a78bfa"},
-  {id:"FIBl",name:"FIB Listening",         skill:"listening", w:3, baseline:25, target:50, color:"#fb923c"},
+
+// ── All 22 tasks matching the weekly schedule ──
+const ALL_TASKS = [
+  // Speaking
+  {id:"RA",    name:"Read Aloud",              skill:"Speaking",  session:["sang","chieu","toi"]},
+  {id:"RS",    name:"Repeat Sentence",         skill:"Speaking",  session:["sang","chieu","toi"]},
+  {id:"DI",    name:"Describe Image",          skill:"Speaking",  session:["sang","chieu","toi"]},
+  {id:"RL",    name:"Retell Lecture",          skill:"Speaking",  session:["sang","chieu","toi"]},
+  {id:"ASQ",   name:"Answer Short Question",   skill:"Speaking",  session:["sang","chieu","toi"]},
+  {id:"SGD",   name:"Summ. Group Discussion",  skill:"Speaking",  session:["sang","chieu","toi"]},
+  {id:"RTAS",  name:"Respond to a Situation",  skill:"Speaking",  session:["sang","chieu","toi"]},
+  // Writing
+  {id:"SWT",   name:"Summ. Written Text",      skill:"Writing",   session:["sang","chieu","toi"]},
+  {id:"ESSAY", name:"Write Essay",             skill:"Writing",   session:["sang","chieu","toi"]},
+  // Reading
+  {id:"DD",    name:"Dropdown FIB-r",          skill:"Reading",   session:["sang","chieu","toi"]},
+  {id:"DND",   name:"Drag&Drop FIB-rw",        skill:"Reading",   session:["sang","chieu","toi"]},
+  {id:"RO",    name:"Re-order Paragraphs",     skill:"Reading",   session:["sang","chieu","toi"]},
+  {id:"MCQR",  name:"MCQ Reading",             skill:"Reading",   session:["sang","chieu","toi"]},
+  // Listening
+  {id:"SST",   name:"Summ. Spoken Text",       skill:"Listening", session:["sang","chieu","toi"]},
+  {id:"FIBL",  name:"FIB Listening",           skill:"Listening", session:["sang","chieu","toi"]},
+  {id:"HIW",   name:"Highlight Incorrect W.",  skill:"Listening", session:["sang","chieu","toi"]},
+  {id:"WFD",   name:"Write From Dictation",    skill:"Listening", session:["sang","chieu","toi"]},
+  {id:"MCQL",  name:"MCQ Listening",           skill:"Listening", session:["sang","chieu","toi"]},
+  {id:"HCS",   name:"Highlight Correct Sum.",  skill:"Listening", session:["sang","chieu","toi"]},
+  {id:"SMW",   name:"Select Missing Word",     skill:"Listening", session:["sang","chieu","toi"]},
 ];
 
-const SKILL_CONTRIB = {
-  RS:{speaking:16,listening:17}, WFD:{writing:23,listening:13},
-  SST:{writing:18,listening:10}, FIBrw:{reading:20}, RA:{speaking:9},
-  DI:{speaking:31}, RL:{speaking:13,listening:13}, SWT:{writing:28,reading:23}, FIBl:{listening:8},
-};
+const SKILL_COLOR = {Speaking:"#38bdf8", Writing:"#a78bfa", Reading:"#22c55e", Listening:"#fb923c"};
+const SESSION_LABEL = {sang:"🌅 Sáng", chieu:"☀️ Chiều", toi:"🌙 Tối"};
 
-function load(){try{return JSON.parse(localStorage.getItem("pte5d")||"{}");}catch{return{};}}
-function save(){localStorage.setItem("pte5d",JSON.stringify(DATA));}
-const DATA=load();
-if(!DATA.entries)DATA.entries={};
+// ── Storage ──
+function loadData(){try{return JSON.parse(localStorage.getItem("pte_v2")||"{}");}catch{return{};}}
+function saveData(){localStorage.setItem("pte_v2",JSON.stringify(DB));}
+const DB = loadData();
+if(!DB.sessions) DB.sessions = []; // [{day, session, scores:{taskId:"done/total"}}]
 
-function parseScore(v){const m=(v||"").trim().match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);return m?{raw:+m[1],max:+m[2]}:null;}
-function calcPct(arr){let r=0,mx=0,cnt=0;(arr||[]).forEach(v=>{const p=parseScore(v);if(p&&p.max>0){r+=p.raw;mx+=p.max;cnt++;}});return{raw:r,max:mx,cnt,pct:mx>0?(r/mx)*100:null};}
-function scoreClass(p){return p==null?"gs-na":p>=70?"gs-done":p>=45?"gs-almost":"gs-need";}
-function getStatusLabel(p,target){if(p==null)return"No data";if(p>=target+10)return"✅ Mastered";if(p>=target)return"✅ Achieved";if(p>=target-10)return"🔄 Almost";return"⚠️ Need Work";}
+// ── State ──
+let curSession = "sang";
+let curDay = 1;
 
-function calcPrediction(){
-  const skillAcc={speaking:[],writing:[],reading:[],listening:[]};
-  let wSum=0,totalW=0;
-  TRACKER_TASKS.forEach(t=>{
-    const arr=DATA.entries[t.id]||[];
-    const c=calcPct(arr);
-    const pct=c.pct!=null?c.pct:t.baseline;
-    const contrib=SKILL_CONTRIB[t.id]||{};
-    Object.entries(contrib).forEach(([sk,cw])=>{if(skillAcc[sk])skillAcc[sk].push({pct,cw});});
-    totalW+=t.w;wSum+=(pct/100)*t.w;
+// ── Session buttons ──
+document.querySelectorAll(".sess-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".sess-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    curSession = btn.dataset.s;
+    loadSessionInputs();
   });
-  const pred=Math.min(90,(wSum/totalW)*100*0.9);
-  const skills={};
-  Object.entries(skillAcc).forEach(([sk,arr])=>{
-    if(!arr.length){skills[sk]=null;return;}
-    let ws=0,tw=0;
-    arr.forEach(({pct,cw})=>{ws+=(pct/100)*cw;tw+=cw;});
-    skills[sk]=tw>0?(ws/tw)*90:null;
+});
+document.getElementById("dayPicker").addEventListener("change", function(){
+  curDay = Math.max(1,Math.min(30,+this.value||1));
+  this.value = curDay;
+  loadSessionInputs();
+});
+
+function getExistingEntry(){
+  return DB.sessions.find(s=>s.day===curDay && s.session===curSession) || null;
+}
+
+function loadSessionInputs(){
+  const grid = document.getElementById("sessionGrid");
+  const existing = getExistingEntry();
+  const scores = existing ? existing.scores : {};
+
+  // Group tasks by skill
+  const bySkill = {};
+  ALL_TASKS.forEach(t=>{
+    if(!bySkill[t.skill]) bySkill[t.skill]=[];
+    bySkill[t.skill].push(t);
   });
-  return{pred,skills};
-}
 
-function buildTracker(){
-  const grid=document.getElementById("trackerGrid");
-  grid.innerHTML="";
-  TRACKER_TASKS.forEach(t=>{
-    const arr=DATA.entries[t.id]||[];
-    if(!arr.length)arr.push("");
-    DATA.entries[t.id]=arr;
-    const c=calcPct(arr);const pct=c.pct;
-    const barW=pct!=null?Math.min(100,pct):0;
-    const card=document.createElement("div");card.className="tcard";card.dataset.id=t.id;
-    card.innerHTML=`
-      <div class="tcard-head"><div class="tcard-name">${t.name}</div><div class="tcard-weight">${t.w}% overall</div></div>
-      <div class="tcard-baseline">Mock: <span style="color:var(--muted)">${t.baseline}%</span> → Target: <span style="color:var(--yellow)">${t.target}%</span> → Now: <span style="color:var(--blue);font-weight:700">${pct!=null?pct.toFixed(1)+"%":"—"}</span></div>
-      <div class="bar-wrap" style="height:8px"><div class="bar-base" style="width:${Math.min(100,t.baseline)}%;background:${t.color}"></div><div class="bar-now" style="width:${barW}%;background:${t.color}"></div><div class="bar-target-line" style="left:${Math.min(100,t.target)}%"></div></div>
-      <div style="font-size:9px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:6px"><span>0%</span><span style="color:var(--yellow)">▲${t.target}%</span><span>100%</span></div>
-      <div class="entries-list" id="list_${t.id}"></div>
-      <button class="add-btn" data-id="${t.id}">+ Thêm bài (Enter)</button>
-      <div class="tcard-total"><span style="color:var(--muted);font-size:11px">${c.cnt} bài · ${c.raw.toFixed(1)}/${c.max.toFixed(1)}</span><span class="goal-status ${scoreClass(pct)}">${getStatusLabel(pct,t.target)}</span></div>`;
-    grid.appendChild(card);
-    renderEntries(t.id);
-    card.querySelector(".add-btn").addEventListener("click",()=>addEntry(t.id));
-  });
-}
+  grid.innerHTML = "";
+  Object.entries(bySkill).forEach(([skill, tasks])=>{
+    const skillCard = document.createElement("div");
+    skillCard.style.cssText="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;";
 
-function renderEntries(id){
-  const list=document.getElementById("list_"+id);if(!list)return;
-  const arr=DATA.entries[id]||[];
-  const t=TRACKER_TASKS.find(x=>x.id===id);
-  list.innerHTML="";
-  arr.forEach((val,idx)=>{
-    const row=document.createElement("div");row.className="input-grid";
-    const sc=parseScore(val);const pct=sc&&sc.max>0?(sc.raw/sc.max)*100:null;
-    const pctColor=pct==null?"var(--muted)":pct>=t.target?"var(--green)":pct>=t.target-10?"var(--yellow)":"var(--red)";
-    row.innerHTML=`<input class="entry-input" type="text" value="${val}" placeholder="vd: 9.8/13" data-id="${id}" data-idx="${idx}"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px"><span class="entry-pct" style="color:${pctColor}">${pct!=null?pct.toFixed(1)+"%":"—"}</span><button class="remove-btn" data-id="${id}" data-idx="${idx}">✕</button></div>`;
-    list.appendChild(row);
-    row.querySelector(".entry-input").addEventListener("input",function(){DATA.entries[id][idx]=this.value.trim();save();refreshCard(id);updateOverall();});
-    row.querySelector(".entry-input").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addEntry(id);}});
-    row.querySelector(".remove-btn").addEventListener("click",function(){DATA.entries[id].splice(idx,1);if(!DATA.entries[id].length)DATA.entries[id]=[""];save();refreshCard(id);updateOverall();});
-  });
-}
+    const hdr = document.createElement("div");
+    hdr.style.cssText=`font-size:10px;font-weight:700;color:${SKILL_COLOR[skill]};text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;`;
+    hdr.textContent = skill;
+    skillCard.appendChild(hdr);
 
-function addEntry(id){
-  if(!DATA.entries[id])DATA.entries[id]=[];
-  DATA.entries[id].push("");save();refreshCard(id);
-  setTimeout(()=>{const list=document.getElementById("list_"+id);if(list){const inp=list.querySelectorAll(".entry-input");if(inp.length)inp[inp.length-1].focus();}},50);
-}
+    tasks.forEach(t=>{
+      const val = scores[t.id] || "";
+      const row = document.createElement("div");
+      row.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:7px;";
 
-function refreshCard(id){
-  const t=TRACKER_TASKS.find(x=>x.id===id);
-  const arr=DATA.entries[id]||[];
-  const c=calcPct(arr);const pct=c.pct;
-  const barW=pct!=null?Math.min(100,pct):0;
-  const card=document.querySelector(`.tcard[data-id="${id}"]`);if(!card)return;
-  const barNow=card.querySelector(".bar-now");if(barNow)barNow.style.width=barW+"%";
-  const baseline=card.querySelector(".tcard-baseline");
-  if(baseline)baseline.innerHTML=`Mock: <span style="color:var(--muted)">${t.baseline}%</span> → Target: <span style="color:var(--yellow)">${t.target}%</span> → Now: <span style="color:var(--blue);font-weight:700">${pct!=null?pct.toFixed(1)+"%":"—"}</span>`;
-  const tot=card.querySelector(".tcard-total");
-  if(tot)tot.innerHTML=`<span style="color:var(--muted);font-size:11px">${c.cnt} bài · ${c.raw.toFixed(1)}/${c.max.toFixed(1)}</span><span class="goal-status ${scoreClass(pct)}">${getStatusLabel(pct,t.target)}</span>`;
-  renderEntries(id);
-}
+      const label = document.createElement("span");
+      label.style.cssText="flex:1;font-size:11px;color:var(--text);";
+      label.textContent = t.name;
 
-function updateOverall(){
-  const {pred,skills}=calcPrediction();
-  const predEl=document.getElementById("predScore");
-  const gapEl=document.getElementById("predGap");
-  const fillEl=document.getElementById("progFill");
-  if(predEl)predEl.textContent=pred.toFixed(1);
-  if(gapEl){const g=pred-50;gapEl.textContent=(g>=0?"+":"")+g.toFixed(1);gapEl.style.color=g>=0?"var(--green)":"var(--red)";}
-  if(fillEl){fillEl.style.width=Math.min(100,(pred/90)*100)+"%";fillEl.style.background=pred>=50?"var(--green)":pred>=40?"var(--yellow)":"var(--red)";}
-  [{key:"speaking",id:"speaking",color:"#38bdf8"},{key:"writing",id:"writing",color:"#a78bfa"},{key:"reading",id:"reading",color:"#22c55e"},{key:"listening",id:"listening",color:"#fb923c"}].forEach(s=>{
-    const sc=skills[s.key];
-    const barEl=document.getElementById("sb-"+s.id);const valEl=document.getElementById("sv-"+s.id);
-    if(barEl)barEl.style.width=(sc!=null?Math.min(100,(sc/90)*100):0)+"%";
-    if(valEl){valEl.textContent=sc!=null?sc.toFixed(1):"—";valEl.style.color=sc!=null?(sc>=50?"var(--green)":sc>=40?"var(--yellow)":"var(--red)"):"var(--muted)";}
+      const inp = document.createElement("input");
+      inp.type="text"; inp.value=val; inp.placeholder="—";
+      inp.dataset.task=t.id;
+      inp.style.cssText="width:72px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 7px;font-size:12px;font-family:monospace;outline:none;text-align:center;";
+      inp.addEventListener("focus",function(){this.style.borderColor="var(--blue)";});
+      inp.addEventListener("blur",function(){this.style.borderColor="var(--border)";});
+
+      const pctEl = document.createElement("span");
+      pctEl.style.cssText="font-size:11px;font-family:monospace;font-weight:700;width:40px;text-align:right;";
+      updatePct(inp.value, pctEl);
+
+      inp.addEventListener("input",function(){updatePct(this.value, pctEl);});
+
+      row.appendChild(label); row.appendChild(inp); row.appendChild(pctEl);
+      skillCard.appendChild(row);
+    });
+
+    grid.appendChild(skillCard);
   });
 }
 
+function updatePct(val, el){
+  const m=(val||"").match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  if(m && +m[2]>0){
+    const p=(+m[1]/+m[2])*100;
+    el.textContent=p.toFixed(0)+"%";
+    el.style.color=p>=70?"var(--green)":p>=50?"var(--yellow)":"var(--red)";
+  } else {
+    el.textContent="—"; el.style.color="var(--dim)";
+  }
+}
+
+function parseScore(v){
+  const m=(v||"").match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  return m && +m[2]>0 ? {done:+m[1],total:+m[2],pct:(+m[1]/+m[2])*100} : null;
+}
+
+document.getElementById("saveSession").addEventListener("click",()=>{
+  const inputs = document.querySelectorAll("#sessionGrid input[data-task]");
+  const scores = {};
+  inputs.forEach(inp=>{
+    if(inp.value.trim()) scores[inp.dataset.task]=inp.value.trim();
+  });
+
+  if(!Object.keys(scores).length){
+    const msg=document.getElementById("saveMsg");
+    msg.textContent="⚠️ Chưa nhập dữ liệu gì!"; msg.style.color="var(--red)";
+    setTimeout(()=>msg.textContent="",2000); return;
+  }
+
+  // Remove existing entry for same day+session, then push new
+  DB.sessions = DB.sessions.filter(s=>!(s.day===curDay && s.session===curSession));
+  DB.sessions.push({day:curDay, session:curSession, scores, ts:Date.now()});
+  DB.sessions.sort((a,b)=>a.day-b.day || ["sang","chieu","toi"].indexOf(a.session)-["sang","chieu","toi"].indexOf(b.session));
+  saveData();
+
+  const msg=document.getElementById("saveMsg");
+  msg.textContent=`✅ Đã lưu Ngày ${curDay} — ${SESSION_LABEL[curSession]}`; msg.style.color="var(--green)";
+  setTimeout(()=>msg.textContent="",3000);
+  renderHistory();
+});
+
+// ── History table ──
+function renderHistory(){
+  const body = document.getElementById("histBody");
+  const noHist = document.getElementById("noHistory");
+  const headRow = document.getElementById("histHead");
+
+  if(!DB.sessions.length){
+    body.innerHTML=""; noHist.style.display="block";
+    headRow.innerHTML='<th style="padding:7px 10px;text-align:left;border:1px solid var(--border);color:var(--muted);font-size:10px;">Ngày</th><th style="padding:7px 10px;text-align:left;border:1px solid var(--border);color:var(--muted);font-size:10px;">Buổi</th>';
+    return;
+  }
+  noHist.style.display="none";
+
+  // Collect all tasks that have been entered at least once
+  const usedTasks = new Set();
+  DB.sessions.forEach(s=>Object.keys(s.scores).forEach(k=>usedTasks.add(k)));
+  const taskList = ALL_TASKS.filter(t=>usedTasks.has(t.id));
+
+  const th = s => `<th style="padding:6px 8px;border:1px solid var(--border);color:var(--muted);font-size:10px;white-space:nowrap;background:var(--surface);">${s}</th>`;
+  headRow.innerHTML = th("Ngày") + th("Buổi") + taskList.map(t=>th(t.id)).join("");
+
+  const td = (v,color="var(--text)") => `<td style="padding:5px 8px;border:1px solid var(--border);text-align:center;font-family:monospace;font-size:11px;color:${color};">${v}</td>`;
+
+  body.innerHTML = DB.sessions.map(s=>{
+    const cells = taskList.map(t=>{
+      const sc = parseScore(s.scores[t.id]||"");
+      if(!sc) return td("—","var(--dim)");
+      const color = sc.pct>=70?"var(--green)":sc.pct>=50?"var(--yellow)":"var(--red)";
+      return td(sc.pct.toFixed(0)+"%", color);
+    }).join("");
+    return `<tr>
+      <td style="padding:5px 10px;border:1px solid var(--border);font-weight:700;color:var(--text);font-size:11px;">Ngày ${s.day}</td>
+      <td style="padding:5px 10px;border:1px solid var(--border);color:var(--muted);font-size:11px;">${SESSION_LABEL[s.session]||s.session}</td>
+      ${cells}
+    </tr>`;
+  }).join("");
+}
+
+// ── Tab switching — override for tracker ──
 document.querySelectorAll(".tab").forEach(tab=>{
   tab.addEventListener("click",()=>{
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
     tab.classList.add("active");
-    ["analysis","strategy","schedule","tracker","rules"].forEach(id=>{const el=document.getElementById("tab-"+id);if(el)el.style.display="none";});
+    ["analysis","strategy","schedule","tracker","rules"].forEach(id=>{
+      const el=document.getElementById("tab-"+id);if(el)el.style.display="none";
+    });
     const t=tab.dataset.t;
     const el=document.getElementById("tab-"+t);if(el)el.style.display="block";
-    if(t==="tracker"){buildTracker();updateOverall();}
+    if(t==="tracker"){loadSessionInputs();renderHistory();}
   });
 });
 
-setInterval(save,30000);
-window.addEventListener("beforeunload",save);
+// ── Days left ──
+const EXAM_DATE=new Date("2026-07-28");
+function daysLeft(){return Math.max(0,Math.ceil((EXAM_DATE-new Date())/86400000));}
+document.getElementById("daysLeft").textContent=daysLeft();
+
+// ── Sess-btn styling ──
+const sbStyle=document.createElement("style");
+sbStyle.textContent=`.sess-btn{padding:7px 16px;border-radius:20px;font-size:12px;cursor:pointer;background:var(--surface);color:var(--muted);border:1px solid var(--border);font-weight:600;}.sess-btn.active{background:var(--blue);color:#000;border-color:var(--blue);}`;
+document.head.appendChild(sbStyle);
+
+// ── Init ──
+loadSessionInputs();
+renderHistory();
+setInterval(saveData,30000);
+window.addEventListener("beforeunload",saveData);
+
 </script>
 </body>
 </html>
