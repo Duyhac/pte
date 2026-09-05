@@ -491,11 +491,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 </div><!-- /wrap -->
 
 <script>
-const EXAM_DATE = new Date("2026-07-28");
-function daysLeft(){return Math.max(0,Math.ceil((EXAM_DATE-new Date())/86400000));}
-document.getElementById("daysLeft").textContent = daysLeft();
-
-
 // ── All 22 tasks matching the weekly schedule ──
 const ALL_TASKS = [
   // Speaking
@@ -716,6 +711,7 @@ loadSessionInputs();
 renderHistory();
 setInterval(saveData,30000);
 window.addEventListener("beforeunload",saveData);
+
 
 </script>
 </body>
